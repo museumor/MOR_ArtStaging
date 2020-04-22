@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - projectile
+  - FxTemporaire
+  - LevelLoader
+  - ParticleGameObject
+  - StickToSurface
+  - NoMaterialChanges
+  - Hand
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - FlatScreenUI
+  - Wall
+  - OtherWorld
+  - PortalTextureIgnore
+  - PortalTextureKeep
+  - Hands
+  - NotVisisble
+  - PortalMiddle
+  - ArtworkLight
+  - ArtworkLightOther
+  - PanningLight
+  - HandsOther
+  - Floor
+  - FloorOther
+  - ArtworkSofterLight
+  - ArtworkSofterSofterLight
+  - Grabbable
+  - NotVisibleToLocalPlayer
+  - WallThrough
+  - ScreenShotCameraOnly
+  - GrabbableOther
+  - ButtonPresser
+  - AudioOcclusion
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: UI
+    uniqueID: 3614421283
+    locked: 0

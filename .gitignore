@@ -1,0 +1,105 @@
+# =============== #
+# Unity generated #
+# =============== #
+
+[Tt]emp/
+[Oo]bj/
+[Bb]uild
+[Ll]ibrary/
+sysinfo.txt
+*.stackdump
+[Bb]uilds/
+
+# ================ #
+# Local processing #
+# ================ #
+
+Assets/LODs
+Assets/LODs.meta
+/.mayaSwatches/
+Assets/FR2_Cache.asset
+Assets/FR2_Cache.asset.meta
+Assets/StreamingAssets/aa
+Assets/StreamingAssets/aa.meta
+
+# =========== #
+# Large files #
+# =========== #
+
+Assets/StreamingAssets/Places/
+Assets/StreamingAssets/Places.meta
+Assets/StreamingAssets/Music
+Assets/StreamingAssets/Music.meta
+Assets/StreamingAssets/Az/
+Assets/StreamingAssets/Az.meta
+Assets/GalleryPieces/Tann/BlackHoleStuff/Textures/Skybox2_8/New Cubemap.cubemap
+Assets/GalleryPieces/Tann/BlackHoleStuff/Textures/Skybox2_8/New Cubemap.cubemap.meta
+Assets/GalleryPieces/Az/Cemetary
+Assets/GalleryPieces/Az/Cemetary.meta
+Assets/GalleryPieces/Az/Church3
+Assets/GalleryPieces/Az/Church3.meta
+Assets/GalleryPieces/Az/Geghard3
+Assets/GalleryPieces/Az/Geghard3.meta
+Assets/GalleryPieces/Az/IcelandHofdi
+Assets/GalleryPieces/Az/IcelandHofdi.meta
+Assets/GalleryPieces/Teeps/Resources/Valerian
+Assets/GalleryPieces/Teeps/Resources/Valerian.meta
+Assets/GalleryPieces/Anna/BackyardSale.fbx
+Assets/GalleryPieces/Anna/BackyardSale.fbx.meta
+ArtFileOriginals/Az
+ArtFileOriginals/Az.meta
+Assets/GalleryPieces/MattSchaefer/Scifi world 3mil.FBX
+Assets/GalleryPieces/MattSchaefer/Scifi world 3mil.FBX.meta
+Assets/GalleryPieces/Kirshbaum/Dafen/Videos
+
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+
+[Ee]xported[Oo]bj/
+.vs/
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+Assets/Plugins/Editor/JetBrains/
+ 
+# ============ #
+# OS generated #
+# ============ #
+
+.DS_Store*
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+[Tt]humbs.db
+[Tt]humbs.db.meta
+Steam/MOR
+Assets/ProCore
+Assets/Ultimate Game Tools
+Assets/Ultimate Game Tools.meta
+Assets/ProCore.meta
+Assets/StreamingAssets.meta
+
+# ============ #
+# Rider IDE generated #
+# ============ #
+*.idea
+Assets/GalleryPieces/Sutu/Tetsuo/cyberpunk2/cyberpunk2.obj
+Assets/Plugins/Editor/JetBrains.meta
+Assets/GalleryPieces/ToshiHoo/
+
+# ============ #
+# SteamVR generated #
+# ============ #
+unityProject.vrmanifest
+
+Cubiquity\.log
+Assets/GalleryPieces/Kirshbaum/Dafen/Videos.meta
+/Android
