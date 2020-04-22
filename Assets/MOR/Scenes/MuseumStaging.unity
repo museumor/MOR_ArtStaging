@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 0.5
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_IndirectSpecularColor: {r: 0.2153233, g: 0.34510964, b: 0.4875849, a: 0.5}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -133,7 +133,7 @@ PrefabInstance:
     - target: {fileID: 7130011229808858636, guid: 61d1decee08d7ef40b5a9916db504ed2,
         type: 3}
       propertyPath: m_Name
-      value: MarkersLight
+      value: Markers
       objectReference: {fileID: 0}
     - target: {fileID: 7130011229808858637, guid: 61d1decee08d7ef40b5a9916db504ed2,
         type: 3}
@@ -173,7 +173,7 @@ PrefabInstance:
     - target: {fileID: 7130011229808858637, guid: 61d1decee08d7ef40b5a9916db504ed2,
         type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7130011229808858637, guid: 61d1decee08d7ef40b5a9916db504ed2,
         type: 3}
@@ -365,40 +365,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &3165422271121683810
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3165422271725715480, guid: 3533ee50d0491e24eabe3c3a96bc461a,
-        type: 3}
-      propertyPath: m_Name
-      value: MarkersDark
-      objectReference: {fileID: 0}
-    - target: {fileID: 3165422271725715481, guid: 3533ee50d0491e24eabe3c3a96bc461a,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3165422271725715481, guid: 3533ee50d0491e24eabe3c3a96bc461a,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3165422271725715481, guid: 3533ee50d0491e24eabe3c3a96bc461a,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 3165422271725715481, guid: 3533ee50d0491e24eabe3c3a96bc461a,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 3533ee50d0491e24eabe3c3a96bc461a, type: 3}
 --- !u!1001 &3421757931513963294
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -540,6 +506,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1655611537}
     m_Modifications:
+    - target: {fileID: 621887209625153433, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
     - target: {fileID: 4186038837112294354, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
         type: 3}
       propertyPath: m_Convex
@@ -605,11 +576,41 @@ PrefabInstance:
       propertyPath: m_Name
       value: Rooms
       objectReference: {fileID: 0}
+    - target: {fileID: 4724692045665510761, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
     - target: {fileID: 5096387006041112280, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: e917a9c60bb77a54e924a631d625814c, type: 2}
+    - target: {fileID: 5514866228796279250, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741716864026191185, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741716864026191185, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 7796164089460854391, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 9015232775685626520, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 940c50dc031b6fb4f84bbe4d647b9f8e, type: 3}
 --- !u!1001 &6686023714835916690
