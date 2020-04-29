@@ -115,10 +115,10 @@ namespace MOR.Museum {
 			string fileExtension = fileSplit[fileSplit.Length - 1];
 			string result = "";
 			if (CheckExtension(fileExtension)) {
-				result = ($"INVALID FILETYPE : please export all models as .fbx : {assetPath}/n");
+				result = ($"INVALID FILETYPE : please export all models as .fbx : {assetPath}/nGameObject/Export To FBX... in menubar");
 			}
 			else if (String.CompareOrdinal("fbx", fileExtension.ToLower()) != 0) { //wait, what filetype is this?
-				result = ($"INVALID FILETYPE : please export all models as .fbx : {assetPath}/n");
+				result = ($"INVALID FILETYPE : please export all models as .fbx : {assetPath}/nGameObject/Export To FBX... in menubar");
 			}
 
 			return result;
