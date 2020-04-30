@@ -268,7 +268,7 @@ inline FragmentCommonData SpecularSetup_MOR (float4 i_tex,float4 i_color)
     
     
     #if _SATURATION
-       // color = lerp(Luminance(color),color,_SaturationValue);
+       col = lerp(Luminance(col),col,_SaturationValue);
     #endif
     half3 diffColor = EnergyConservationBetweenDiffuseAndSpecular (col, specColor, /*out*/ oneMinusReflectivity);
     #if _SPECULARMULTIPLIER
@@ -518,9 +518,10 @@ half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i, UNITY_VPOS_TYPE screenP
         float fade = UnityComputeShadowFadeDistance(s.posWorld, zDist);
         //data.atten = UnityMixRealtimeAndBakedShadows(data.atten, bakedAtten, UnityComputeShadowFade(fadeDist));
         float shadow = lerp(atten,1, UnityComputeShadowFade(fade) );
-         c.rgb = min(c.rgb, lerp(_ColorShadow.rgb,float3(1,1,1) ,shadow) );
+        c.rgb = min(c.rgb, lerp(_ColorShadow.rgb,c.rgb ,shadow) );
         //c.rgb -= saturate(1-atten);
     #endif
+    
     #if !_LIGHTMAP
         float3 emissionCol=i.emissionCol.rgb;//(i.color.rgb);//*i.color.a; //The alpha multiply here is messing up dresses.
     #else

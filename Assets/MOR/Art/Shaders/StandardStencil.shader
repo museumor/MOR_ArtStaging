@@ -57,9 +57,6 @@ Shader "_MOR/Standard Stencil"
 		_FadeDistanceStart("Fade Distance Start",float) =0.1
 		_FadeDistanceEnd("Fade Distance End",float) = 0.5
 		
-		[Toggle(_USESECONDARYCOLOR)] _UseSecondaryColor ("Use Secondary Color",Int) = 0
-		_SecondaryColor ("SecondaryColor",Color) = (1,1,1,1)
-		_SecondaryEmission ("SecondaryEmissionColor",Color) = (0.65,0.65,0.65,1)
 		
 		[HideInInspector] _Mode ("__mode", Float) = 0.0
 		[Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Blend Source", Float) = 1.0
@@ -73,10 +70,10 @@ Shader "_MOR/Standard Stencil"
 		// UI-only data
 		[Toggle(_DISABLEFOG)] _DisableFor ("DisableFog",int)= 0
 		[Toggle(_DISABLEDIRECTIONAL)] _DisableDirectional ("Disable Directional Light",int)=0
-		[Toggle(_USEVERTEXCOLOR)] _UseVertexColor ("Use Vertex Color",int) = 0
-		 [Toggle(_LINEARVERTEXCOLOR)] _LinearVertexColor ("Linear VertexColor",int) = 0
+		[Toggle(_USEVERTEXCOLOR)] _UseVertexColor ("Use Vertex Colour",int) = 0
+		 [Toggle(_LINEARVERTEXCOLOR)] _LinearVertexColor ("Linear VertexColour",int) = 0
 		[Toggle(_SATURATION)] _SetSaturation ("Set Saturation",int) = 0
-		_SaturationValue ("saturation value",float) = 1
+		_SaturationValue ("Saturation Value",float) = 1
 			// sarah difference from Standard Unity shader
 		_StencilRef("Stencil Ref ID", Int) = 1
 		[Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil Comparison", int) = 0 //Disabled=0,Never,Less,Equal,LessEqual,Greater,NotEqual,GreaterEqual,Always=8
@@ -86,26 +83,17 @@ Shader "_MOR/Standard Stencil"
 
 		
         [Toggle(_USE_AMBIENT_OVERRIDE)]_UseAmbientOverride ("Use Ambient Override",int) = 0
-        _ColorAmbient ("Ambient Color",Color) = (0,0,0,1)
-        _ColorShadow ("Shadow Color",Color) = (0,0,0,1)
+        _ColorAmbient ("Ambient Colour",Color) = (0,0,0,1)
+        _ColorShadow ("Shadow Colour",Color) = (0,0,0,1)
         [Toggle(_RIMLIGHT)] _Rimlight ("Rimlight",int) = 0
-        [HDR]_ColorRimlight ("Rimlight Color",Color) = (1,1,1,1)
+        [HDR]_ColorRimlight ("Rimlight Colour",Color) = (1,1,1,1)
         _RimPower ("Rimlight Pow",float) = 12
         _RimGrow ("Rim Grow",float) = 0
         _RimDirection("Rim Light Direction",Vector) = (-0.2,-0.2,1,1)
         [Toggle(_MATCAP)] _Matcap ("Matcap",int) = 0
         _MatcapTex ("Matcap Texture",2D) = "black" {}
-                [Toggle(_TRIPLANAR)] _Triplanar ("tiplanar mapping",int) = 0
-                
-                
-                
-        _SpacingY ("Y spacing",float) = 1
-        _BandColor ("BandColor X=tile,OffsetX=Multiply",2D) = "white" {}
-        _SinAmplitude ("SinAmplitude",float) = 0.2
-        _SinFrequency("_SinFrequency",float) = 0.5
-        _SinAmplitude2 ("SinAmplitude",float) = 2
-        [Toggle(_STRIATION)]_Striation("Striation",int) = 1
-               
+        [Toggle(_TRIPLANAR)] _Triplanar ("tiplanar mapping",int) = 0
+
 	}
     
 	CGINCLUDE
@@ -195,37 +183,30 @@ Shader "_MOR/Standard Stencil"
 			#pragma fragment fragForwardBase_MOR
 
 			#include "UnityStandardCore.cginc"
-    #if _USESECONDARYCOLOR
-        uniform float4 _SecondaryColor;
-        uniform float4 _SecondaryEmission;
-    #endif
-    #if _USE_AMBIENT_OVERRIDE
-        uniform float4 _ColorAmbient;
-    #endif
-    #if _RIMLIGHT
-        uniform float4 _ColorRimlight;
-        uniform float _RimPower;
-        uniform float _RimGrow;
-        uniform float4 _RimDirection;
-    #endif
-    #if _MATCAP
-        uniform sampler2D _MatcapTex;
-    #endif
-    uniform float _FadeDistanceStart;
-    uniform float _FadeDistanceEnd;
-    uniform float _SaturationValue;
-    uniform float4 _ColorShadow;
-    
-    
-    #include "NorthwayStandard.cginc"
-  
-    float _SpacingY;
-    float _SinAmplitude;
-    float _SinAmplitude2;
-    float _SinFrequency;
-    sampler2D _BandColor;
-    float4 _BandColor_ST;
-    float _SecondaryScale;
+			
+            #if _USESECONDARYCOLOR
+                uniform float4 _SecondaryColor;
+                uniform float4 _SecondaryEmission;
+            #endif
+            #if _USE_AMBIENT_OVERRIDE
+                uniform float4 _ColorAmbient;
+            #endif
+            #if _RIMLIGHT
+                uniform float4 _ColorRimlight;
+                uniform float _RimPower;
+                uniform float _RimGrow;
+                uniform float4 _RimDirection;
+            #endif
+            #if _MATCAP
+                uniform sampler2D _MatcapTex;
+            #endif
+            uniform float _FadeDistanceStart;
+            uniform float _FadeDistanceEnd;
+            uniform float _SaturationValue;
+            uniform float4 _ColorShadow;
+            
+            
+            #include "NorthwayStandard.cginc"
             
              #if SHADER_API_MOBILE
            half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i) : SV_Target   // backward compatibility (this used to be the fragment entry function)
@@ -453,14 +434,20 @@ Shader "_MOR/Standard Stencil"
 
 
 
-    #if _USE_AMBIENT_OVERRIDE
-        uniform float4 _ColorAmbient;
-    #endif
-    uniform float _FadeDistanceStart;
-    uniform float _FadeDistanceEnd;
-    uniform float _SaturationValue;
-    uniform float4 _ColorShadow;
-    
+            #if _USE_AMBIENT_OVERRIDE
+                uniform float4 _ColorAmbient;
+            #endif
+            uniform float _FadeDistanceStart;
+            uniform float _FadeDistanceEnd;
+            uniform float _SaturationValue;
+            uniform float4 _ColorShadow;
+
+            #if _RIMLIGHT
+                uniform float4 _ColorRimlight;
+                uniform float _RimPower;
+                uniform float _RimGrow;
+                uniform float4 _RimDirection;
+            #endif         
         
             #include "NorthwayStandard.cginc"
              #if SHADER_API_MOBILE
