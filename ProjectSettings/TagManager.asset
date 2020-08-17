@@ -11,6 +11,13 @@ TagManager:
   - StickToSurface
   - NoMaterialChanges
   - Hand
+  - tb_anchor
+  - Table
+  - Antenna2
+  - Antenna1
+  - Antenna3
+  - Ghost
+  - Grabbable
   layers:
   - Default
   - TransparentFX

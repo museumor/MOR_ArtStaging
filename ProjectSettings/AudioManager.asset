@@ -10,10 +10,10 @@ AudioManager:
   Default Speaker Mode: 2
   m_SampleRate: 48000
   m_DSPBufferSize: 1024
-  m_VirtualVoiceCount: 64
+  m_VirtualVoiceCount: 512
   m_RealVoiceCount: 64
-  m_SpatializerPlugin: 
-  m_AmbisonicDecoderPlugin: 
+  m_SpatializerPlugin: Steam Audio Spatializer
+  m_AmbisonicDecoderPlugin: Steam Audio Ambisonics
   m_DisableAudio: 0
   m_VirtualizeEffects: 1
   m_RequestedDSPBufferSize: 0
