@@ -6,13 +6,13 @@
 //{
     float4 vertex   : POSITION;
     half3 normal    : NORMAL;
-    #if !defined(LIGHTMAP_ON)
+    #if !defined(LIGHTMAP_ON) && !defined(DIRLIGHTMAP_COMBINED)
         float4 uv0      : TEXCOORD0;//MOR: Change to float4
     #else
         float2 uv0      : TEXCOORD0;//MOR: Change to float4
     #endif
     float2 uv1      : TEXCOORD1;
-#if defined(DYNAMICLIGHTMAP_ON) || defined(UNITY_PASS_META)
+#if DYNAMICLIGHTMAP_ON || UNITY_PASS_META
     float2 uv2      : TEXCOORD2;
 #endif
 #ifdef _TANGENT_TO_WORLD
@@ -27,10 +27,11 @@
     //See UnityStandardCore.cs ~Line:357
   	struct VertexOutputForwardBaseMOR : VertexOutputForwardBase
 	{
-		float4 color	: COLOR;
 		#if _MATCAP || _RIMLIGHT
 		    float4 viewNorm : NORMAL2;
-		#endif
+		#endif	
+		float4 color	: COLOR;
+
 		#if _TRIPLANAR
 		    float3 vPos : COLOR2;
 		#endif
@@ -88,7 +89,7 @@ float _BlendAmount;
         
         //VertexOutputForwardBase_Radial o = (VertexOutputForwardBase_Radial)o1; //!!!I WANT THIS TO WORK!
         VertexOutputForwardBaseMOR o = vOutToRadialVout(o1, v);//This is lame.
-        #if !defined(LIGHTMAP_ON)
+        #if !defined(LIGHTMAP_ON) && !defined(DIRLIGHTMAP_COMBINED)
             o.tex.zw = (v.uv1.xy - float2(1,2)) * _DetailAlbedoMap_ST.xy + _DetailAlbedoMap_ST.zw; //detail mapping tied into same channel as face colour flag as can't set uv zw in 3d editor programs
         #else
             o.tex.zw = o.tex.xy;
@@ -485,11 +486,11 @@ half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i, UNITY_VPOS_TYPE screenP
         mainLight.color =half3(0,0,0);
         //return half4(1,0,0,1);
     #endif
-    half occlusion = Occlusion(i.tex.xy);
+    half occlusion = Occlusion(i.tex.zw);
     float4 fragAmbIn = i.ambientOrLightmapUV;
     #if _LIGHTMAP
         fragAmbIn = tex2D(_LightMap,i.uv2.xy);
-    #elif LIGHTMAP_ON
+    #elif LIGHTMAP_ON || DIRLIGHTMAP_COMBINED
         fragAmbIn.rgb = 0;
    #endif
     //return fragAmbIn; //lightmap Color.
@@ -505,7 +506,7 @@ half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i, UNITY_VPOS_TYPE screenP
     #endif
     
     #if _USE_AMBIENT_OVERRIDE
-        #if LIGHTMAP_ON
+        #if LIGHTMAP_ON || DIRLIGHTMAP_COMBINED
             fragAmbIn.rgb = 0; //this will be lightmap coords, not an ambient value in this situation.
         #endif
         gi.indirect.diffuse.rgb = _ColorAmbient.rgb + fragAmbIn.rgb;
@@ -568,8 +569,8 @@ half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i, UNITY_VPOS_TYPE screenP
     
     #if _MATCAP
         //return float4(i.viewNorm.xyz,1);
-        float3 matCapColor =  tex2D(_MatcapTex,i.viewNorm.xy*0.5+0.5);
-        c.rgb = saturate((matCapColor*2) * c.rgb);
+        float3 matCapColor =  (tex2D(_MatcapTex,i.viewNorm.xy*0.5+0.5).rgb-0.01) *occlusion;
+        c.rgb = (matCapColor*i.color.rgb * c.rgb)*2;
     #endif
 
     //c.rgb *= 1/s.alpha;
@@ -627,7 +628,7 @@ half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i, UNITY_VPOS_TYPE screenP
     float4 fragAmbIn = i.ambientOrLightmapUV;
     #if _LIGHTMAP
         fragAmbIn = tex2D(_LightMap,i.uv2.xy);
-    #elif LIGHTMAP_ON
+    #elif LIGHTMAP_ON || DIRLIGHTMAP_COMBINED
         fragAmbIn.rgb = 0;
    #endif
     //return fragAmbIn; //lightmap Color.
@@ -635,7 +636,7 @@ half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i, UNITY_VPOS_TYPE screenP
     //return half4(gi.indirect.specular,1);
     
     #if _USE_AMBIENT_OVERRIDE
-        #if LIGHTMAP_ON
+        #if LIGHTMAP_ON || DIRLIGHTMAP_COMBINED
             fragAmbIn.rgb = 0; //this will be lightmap coords, not an ambient value in this situation.
         #endif
         gi.indirect.diffuse.rgb = _ColorAmbient.rgb + fragAmbIn.rgb;

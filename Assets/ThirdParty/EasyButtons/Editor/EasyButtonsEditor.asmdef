@@ -1,0 +1,17 @@
+{
+    "name": "EasyButtonsEditor",
+    "references": [
+        "GUID:f9b0cbe5dc4c7b9428ad27972479e6d3"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

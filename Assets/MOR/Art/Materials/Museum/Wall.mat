@@ -8,9 +8,9 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Wall
-  m_Shader: {fileID: 4800000, guid: 5e38b3fb1ba97d94fa542d0e21b1b7e9, type: 3}
+  m_Shader: {fileID: 4800000, guid: 2fe9c18dbef2f2744922adafa2fba478, type: 3}
   m_ShaderKeywords: ETC1_EXTERNAL_ALPHA S_RECEIVE_SHADOWS S_SPECULAR_METALLIC _DISABLEDIRECTIONAL
-    _PARALLAXMAP _SPECULARHIGHLIGHTS_OFF _STOCHASTIC_ALBEDO _STOCHASTIC_HEIGHT
+    _PARALLAXMAP _SPECULARHIGHLIGHTS_OFF _STOCHASTIC_ALBEDO _STOCHASTIC_HEIGHT _STRIATION
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -21,6 +21,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BandColor:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -144,6 +148,7 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _ColorMask: 14
+    - _Contrast: 0
     - _Cull: 2
     - _CullOp: 2
     - _Cutoff: 0.5
@@ -173,14 +178,21 @@ Material:
     - _Rimlight: 0
     - _SaturationValue: 1
     - _SetSaturation: 0
+    - _SinAmplitude: 0.2
+    - _SinAmplitude2: 2
+    - _SinFrequency: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SpacingY: 1
     - _SpecularHighlights: 0
     - _SpecularMode: 2
     - _SrcBlend: 1
+    - _StandardContrastAdd: 0
+    - _StandardContrastMul: 1
     - _StencilComp: 0
     - _StencilOp: 0
     - _StencilRef: 1
     - _StochasticInputSelected: 9
+    - _Striation: 1
     - _Triplanar: 0
     - _UVSec: 0
     - _UseAmbientOverride: 0
