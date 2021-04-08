@@ -22,10 +22,11 @@ namespace MOR.Museum {
 			if (string.IsNullOrEmpty(errors) == false) {
 				var list = errors.Split('\n');
 				foreach (string err in list) {
-					Debug.LogError($"MOR - {err}");
+					if(string.IsNullOrEmpty(err) == false)
+						Debug.LogError($"MOR - {err}");
 				}
 
-				EditorUtility.DisplayDialog("MOR IMPORT WARNING", $"Check Console window for Errors related to asset validation.", "Gotcha");
+				//EditorUtility.DisplayDialog("MOR IMPORT WARNING", $"Check Console window for Errors related to asset validation.", "Gotcha");
 			}
 		}
 

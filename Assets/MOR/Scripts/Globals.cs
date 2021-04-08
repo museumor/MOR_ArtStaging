@@ -35,8 +35,8 @@ namespace MOR.Industries {
 		public static UnityEvent OnUpdate = new UnityEvent();
 
 		private Transform _playerHead;
-		private float lastCheckTime = 0;
-		private float checkFrequency = 1f;
+		//private float lastCheckTime = 0;
+		//private float checkFrequency = 1f;
 
 
 		//public static Transform playerHead { get { return instance._playerHead; } }
