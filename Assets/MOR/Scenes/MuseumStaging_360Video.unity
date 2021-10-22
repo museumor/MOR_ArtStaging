@@ -43,7 +43,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -100,7 +100,8 @@ LightmapSettings:
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 112000000, guid: 591ed3e11699f33438ab5b5e09778d36,
     type: 2}
-  m_UseShadowmask: 0
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 940979ee368d8074eb11261bfe4298b7,
+    type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -120,6 +121,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -619,6 +622,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -643,6 +647,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1240744491
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1113,6 +1118,54 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 940c50dc031b6fb4f84bbe4d647b9f8e, type: 3}
+--- !u!1 &4186038836558538477 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4186038837862300303, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
+    type: 3}
+  m_PrefabInstance: {fileID: 4186038836558538476}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4186038836558538478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4186038836558538477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2c25a5cf4da4d449bbac8716d90589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onExit:
+    m_PersistentCalls:
+      m_Calls: []
+  overrideGlobalFog: 0
+  localFogColor: {r: 0, g: 0, b: 0, a: 0}
+  overrideRoomGraphicsSettings: 0
+  roomGraphicsOverride:
+    overrideFog: 0
+    fog: 0
+    overrideFogDensity: 0
+    fogDensity: 0
+    overrideFogColour: 0
+    fogColour: {r: 1, g: 1, b: 1, a: 1}
+    overrideAmbientLight: 0
+    ambientLight: {r: 0, g: 0, b: 0, a: 0}
+    floorLightColor: {r: 1, g: 1, b: 1, a: 1}
+    postProcessSetting: 0
+    customProfile: {fileID: 0}
+    farClipOverride: 0
+  overrideRoomFloatSettings: 0
+  roomFloatOverride:
+    freeFloating: 0
+    floatSpeedOverride: 0
+    floatAccelerationOverride: 0
+    floatDecelerationOverride: 0
+    floatMaxHeight: 0
+    featherFallSpeed: 0
 --- !u!1001 &6686023714835916690
 PrefabInstance:
   m_ObjectHideFlags: 0
