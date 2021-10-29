@@ -27,7 +27,7 @@ public class MORPoster : MonoBehaviour {
 	}
 	[Button]
 	private void SetPoster(){
-		if (posterTexture) {
+		if (posterTexture == null) {
 			return;
 		}
 		meshRenderer.GetPropertyBlock(propertyBlock);
