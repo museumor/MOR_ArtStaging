@@ -126,6 +126,102 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &59286597 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5837625525735760770, guid: bd028a152729b4049944f8d320a82c77,
+    type: 3}
+  m_PrefabInstance: {fileID: 734701409}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &59286602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59286597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2c25a5cf4da4d449bbac8716d90589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onExit:
+    m_PersistentCalls:
+      m_Calls: []
+  overrideGlobalFog: 0
+  localFogColor: {r: 0, g: 0, b: 0, a: 0}
+  overrideRoomGraphicsSettings: 0
+  roomGraphicsOverride:
+    overrideFog: 0
+    fog: 0
+    overrideFogDensity: 0
+    fogDensity: 0
+    overrideFogColour: 0
+    fogColour: {r: 1, g: 1, b: 1, a: 1}
+    overrideAmbientLight: 0
+    ambientLight: {r: 0, g: 0, b: 0, a: 0}
+    floorLightColor: {r: 1, g: 1, b: 1, a: 1}
+    postProcessSetting: 0
+    customProfile: {fileID: 0}
+    farClipOverride: 0
+  overrideRoomFloatSettings: 0
+  roomFloatOverride:
+    freeFloating: 0
+    floatSpeedOverride: 0
+    floatAccelerationOverride: 0
+    floatDecelerationOverride: 0
+    floatMaxHeight: 0
+    featherFallSpeed: 0
+--- !u!1 &131410658 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8787422345474207638, guid: bd028a152729b4049944f8d320a82c77,
+    type: 3}
+  m_PrefabInstance: {fileID: 734701409}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &131410662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131410658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2c25a5cf4da4d449bbac8716d90589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onExit:
+    m_PersistentCalls:
+      m_Calls: []
+  overrideGlobalFog: 0
+  localFogColor: {r: 0, g: 0, b: 0, a: 0}
+  overrideRoomGraphicsSettings: 0
+  roomGraphicsOverride:
+    overrideFog: 0
+    fog: 0
+    overrideFogDensity: 0
+    fogDensity: 0
+    overrideFogColour: 0
+    fogColour: {r: 1, g: 1, b: 1, a: 1}
+    overrideAmbientLight: 0
+    ambientLight: {r: 0, g: 0, b: 0, a: 0}
+    floorLightColor: {r: 1, g: 1, b: 1, a: 1}
+    postProcessSetting: 0
+    customProfile: {fileID: 0}
+    farClipOverride: 0
+  overrideRoomFloatSettings: 0
+  roomFloatOverride:
+    freeFloating: 0
+    floatSpeedOverride: 0
+    floatAccelerationOverride: 0
+    floatDecelerationOverride: 0
+    floatMaxHeight: 0
+    featherFallSpeed: 0
 --- !u!1001 &152176273
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -225,6 +321,160 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf4f39a3f8e03dd498cff77f1ee840fc, type: 3}
+--- !u!1 &445899786
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 445899787}
+  - component: {fileID: 445899792}
+  - component: {fileID: 445899791}
+  - component: {fileID: 445899790}
+  - component: {fileID: 445899789}
+  - component: {fileID: 445899788}
+  m_Layer: 20
+  m_Name: NewSpaceDimple (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &445899787
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445899786}
+  m_LocalRotation: {x: 0, y: 0, z: -3.399076e-16, w: 1}
+  m_LocalPosition: {x: -0, y: 0.14, z: 0}
+  m_LocalScale: {x: 1.3065, y: 1.3065, z: 0.27170503}
+  m_Children: []
+  m_Father: {fileID: 1026767949}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &445899788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445899786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84a4f15a3179f1d4993aded11f4d0232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  locked: 0
+  markerActive: 1
+--- !u!114 &445899789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445899786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2c25a5cf4da4d449bbac8716d90589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onExit:
+    m_PersistentCalls:
+      m_Calls: []
+  overrideGlobalFog: 0
+  localFogColor: {r: 0, g: 0, b: 0, a: 0}
+  overrideRoomGraphicsSettings: 0
+  roomGraphicsOverride:
+    overrideFog: 0
+    fog: 0
+    overrideFogDensity: 0
+    fogDensity: 0
+    overrideFogColour: 0
+    fogColour: {r: 1, g: 1, b: 1, a: 1}
+    overrideAmbientLight: 0
+    ambientLight: {r: 0, g: 0, b: 0, a: 0}
+    floorLightColor: {r: 1, g: 1, b: 1, a: 1}
+    postProcessSetting: 0
+    customProfile: {fileID: 0}
+    farClipOverride: 0
+  overrideRoomFloatSettings: 0
+  roomFloatOverride:
+    freeFloating: 0
+    floatSpeedOverride: 0
+    floatAccelerationOverride: 0
+    floatDecelerationOverride: 0
+    floatMaxHeight: 0
+    featherFallSpeed: 0
+--- !u!64 &445899790
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445899786}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 1999371230771397015, guid: eadcc627ab405ad45b8b8559ff3ea38e, type: 3}
+--- !u!23 &445899791
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445899786}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 417e639b66cd3a24e9c5312be99ce3bd, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &445899792
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445899786}
+  m_Mesh: {fileID: 1999371230771397015, guid: eadcc627ab405ad45b8b8559ff3ea38e, type: 3}
 --- !u!1001 &579111560
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -483,6 +733,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1258300218741396567}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1026767949 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3849902731203206051, guid: bd028a152729b4049944f8d320a82c77,
+    type: 3}
+  m_PrefabInstance: {fileID: 734701409}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1185779513
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -558,169 +814,9 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1185779513}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1240744487
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1240744488}
-  - component: {fileID: 1240744491}
-  - component: {fileID: 1240744490}
-  - component: {fileID: 1240744489}
-  - component: {fileID: 1240744492}
-  - component: {fileID: 1240744493}
-  m_Layer: 0
-  m_Name: ArtistHallEntryFloor 1 (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
---- !u!4 &1240744488
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1240744487}
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1551232061}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &1240744489
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1240744487}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -4344411752506030865, guid: 75823a3343500ec4894da6708b15a9ad, type: 3}
---- !u!23 &1240744490
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1240744487}
-  m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 417e639b66cd3a24e9c5312be99ce3bd, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1240744491
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1240744487}
-  m_Mesh: {fileID: -4344411752506030865, guid: 75823a3343500ec4894da6708b15a9ad, type: 3}
---- !u!114 &1240744492
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1240744487}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84a4f15a3179f1d4993aded11f4d0232, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  locked: 0
-  markerActive: 1
---- !u!114 &1240744493
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1240744487}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a2c25a5cf4da4d449bbac8716d90589, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onEnter:
-    m_PersistentCalls:
-      m_Calls: []
-  onExit:
-    m_PersistentCalls:
-      m_Calls: []
-  overrideGlobalFog: 0
-  localFogColor: {r: 0, g: 0, b: 0, a: 0}
-  overrideRoomGraphicsSettings: 1
-  roomGraphicsOverride:
-    overrideFog: 0
-    fog: 0
-    overrideFogDensity: 0
-    fogDensity: 1.84
-    overrideFogColour: 0
-    fogColour: {r: 1, g: 1, b: 1, a: 1}
-    overrideAmbientLight: 0
-    ambientLight: {r: 0, g: 0, b: 0, a: 0}
-    floorLightColor: {r: 1, g: 1, b: 1, a: 1}
-    postProcessSetting: 0
-    customProfile: {fileID: 0}
-    farClipOverride: 0
-  overrideRoomFloatSettings: 1
-  roomFloatOverride:
-    freeFloating: 0
-    floatSpeedOverride: 0
-    floatAccelerationOverride: 0
-    floatDecelerationOverride: 0
-    floatMaxHeight: 0
-    featherFallSpeed: 0
 --- !u!4 &1472912484 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4186038837862300296, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
-    type: 3}
-  m_PrefabInstance: {fileID: 4186038836558538476}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1551232061 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 915327556330982295, guid: 940c50dc031b6fb4f84bbe4d647b9f8e,
     type: 3}
   m_PrefabInstance: {fileID: 4186038836558538476}
   m_PrefabAsset: {fileID: 0}
