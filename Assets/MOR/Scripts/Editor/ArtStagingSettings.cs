@@ -123,9 +123,16 @@ namespace MOR.Museum {
 
 			if (artStagingSettings == null) {
 				artStagingSettings = CreateInstance<ArtStagingSettings>();
-				AssetDatabase.CreateAsset(artStagingSettings, "Assets/MOR/ArtStagingSettings.asset");
+				if (Directory.Exists("Assets/MOR") == false) {
+					Directory.CreateDirectory("Assets/MOR");
+				}
+				try {
+					AssetDatabase.CreateAsset(artStagingSettings, "Assets/MOR/ArtStagingSettings.asset");
+				}
+				catch (Exception e){
+					Debug.LogError(e.Message);
+				}
 			}
-
 			window.settings = artStagingSettings;
 		}
 
