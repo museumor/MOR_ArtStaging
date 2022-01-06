@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4ac501b8a01d4749b7e109729e7aad8, type: 3}
+  m_Name: ArtStagingSettings
+  m_EditorClassIdentifier: 
+  sceneValidationState: 0
+  modelsValidationState: 0
+  textureValidationState: 0
+  materialValidationState: 0
+  lightProbeValidationState: 0
+  isThroughPortal: 0
+  rootPrefabSource: {fileID: 0}
+  playableDirectorOK: 1
+  colliderValidationState: 0
+  skyboxValidationState: 0
