@@ -116,6 +116,9 @@ namespace MOR.Museum {
 
 		[MenuItem("Tools/MOR ArtStaging")]
 		public static void Init() {
+			if (Application.isPlaying) {
+				return;
+			}
 			ArtStagingEditor window = GetWindow<ArtStagingEditor>("MOR Art Staging", true);
 			window.minSize = window.minSize + new Vector2(0, 30); //MAke taller by default?
 			window.Show();
@@ -1288,7 +1291,8 @@ namespace MOR.Museum {
 					}
 
 					string sourceFilename = Path.GetFileNameWithoutExtension(sourcePath);
-					string outPath = Path.Combine(Path.GetDirectoryName(sourcePath), $"{sourceFilename}_split.fbx");
+					
+					string outPath = Path.Combine(Path.GetDirectoryName(sourcePath), $"{sourceFilename}_{sourceMesh.name}_split.fbx");
 					if (File.Exists(outPath)) {
 						Debug.LogWarning("Overwriting file : This may break previously assigned objects using these meshes");
 					}
