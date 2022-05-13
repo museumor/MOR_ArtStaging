@@ -1,4 +1,5 @@
-﻿using EasyButtons;
+﻿using System;
+using EasyButtons;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,11 +36,12 @@ namespace MOR.Museum
             //pBlock.SetTextureOffset("_LightMap", new Vector2(lightmapCoords.z, lightmapCoords.w));
         }
 #if UNITY_EDITOR
+        public UnityEngine.Rendering.ShadowCastingMode shadowcasting;
         [Button]
         public void SetLightmapCoordsOnMaterial()
         {
-            var rend = GetComponent<MeshRenderer>();
-            var mat = rend.sharedMaterial;
+            MeshRenderer rend = GetComponent<MeshRenderer>();
+            Material mat = rend.sharedMaterial;
             mat.SetVector("_LightMap_ST", lightmapCoords);
             mat.SetTextureScale("_LightMap", new Vector2(lightmapCoords.x, lightmapCoords.y));
             mat.SetTextureOffset("_LightMap", new Vector2(lightmapCoords.z, lightmapCoords.w));
@@ -47,17 +49,45 @@ namespace MOR.Museum
         [Button]
         public void StoreCoordinate()
         {
-            var render = GetComponent<Renderer>();
+            Renderer render = GetComponent<Renderer>();
             lightmapIndex = render.lightmapIndex;
             lightmapCoords = render.lightmapScaleOffset;
+            
+            var s = new SerializedObject(this);
+            var prop = s.FindProperty(nameof(lightmapIndex));
+            prop.intValue = render.lightmapIndex;
+            
+            prop = s.FindProperty(nameof(lightmapCoords));
+            prop.vector4Value = render.lightmapScaleOffset;
+            
+            prop = s.FindProperty(nameof(shadowcasting));
+            prop.intValue = (int)render.shadowCastingMode;
+            
+            s.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(this);
+
+            if (PrefabUtility.IsPartOfAnyPrefab(gameObject)) {
+
+                GameObject assetRoot = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
+                string path = AssetDatabase.GetAssetPath(assetRoot);
+                if (PrefabUtility.IsPartOfAnyPrefab(this) == false) {
+                    PrefabUtility.ApplyAddedComponent(this,path,InteractionMode.AutomatedAction);
+                }                
+                
+                try {
+                    PrefabUtility.ApplyObjectOverride(this, path, InteractionMode.AutomatedAction);
+                }
+                catch (Exception e) {
+                    Debug.LogError(e.Message,gameObject);
+                }
+            }
         }
 
         [Button]
         public void SetLightmapCoordinate()
         {
-            var render = GetComponent<MeshRenderer>();
-            var serializeable = new SerializedObject(render);
+            MeshRenderer render = GetComponent<MeshRenderer>();
+            SerializedObject serializeable = new SerializedObject(render);
             /*var prop = serializeable.FindProperty(nameof(render.lightmapIndex));
             prop.intValue = lightmapIndex;
             prop = serializeable.FindProperty(nameof(render.lightmapScaleOffset));
