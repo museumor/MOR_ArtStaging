@@ -1,5 +1,6 @@
 Shader "_MOR/360 Video Wipe" {
     Properties {
+        _Tint ("Tint Color", Color) = (.5, .5, .5, .5)
         [NoScaleOffset]_MainTex ("MainTex", 2D) = "gray" {}
         [Gamma] _Exposure ("Exposure (Multiply)",float) = 1
         _Alpha ("Alpha (Transparency)",float) = 1
@@ -93,6 +94,7 @@ Shader "_MOR/360 Video Wipe" {
                 o.tex = v.uv;
                 return o;
             }
+            float4 _Tint;
             float _Alpha;
             float _Wipe;
             float _WipePow;
@@ -107,6 +109,9 @@ Shader "_MOR/360 Video Wipe" {
             float _EyeLerp;
             float _Subtract;
             float _Exposure;
+            
+            float4x4  _SpaceMatrix = {{1,0,0,0}  ,{0,1,0,0} ,{0,0,1,0}, {0,0,0,1}};//Identity as default.
+            
             float4 frag(VertexOutput i) : SV_TARGET {
                 //Mask
                 float mask = (tex2D(_Mask,(_Mask_ST.xy*i.tex.xy) + _Mask_ST.zw).r ); // 0-1 value for the mask.
@@ -127,9 +132,11 @@ Shader "_MOR/360 Video Wipe" {
                 float radians = _Rotation * UNITY_PI / 180;
                 float angleSin = sin( radians );
                 float angleCos = cos( radians );
-              
+                viewDirection = mul(_SpaceMatrix,viewDirection);
                 viewDirection = lerp(i.vertex,viewDirection*float3(_FlipX,1,1),_ViewScaler);
                 viewDirection = float3(viewDirection.x*angleCos + viewDirection.z*angleSin , viewDirection.y , -viewDirection.x*angleSin +viewDirection.z*angleCos);
+                
+                
                 viewDirection.xy  *= _UpsideDown > 0 ? -1 : 1;
                 float u = atan2(viewDirection.r,viewDirection.b)/(2*UNITY_PI);
                 float2 uvLeft;
@@ -139,10 +146,13 @@ Shader "_MOR/360 Video Wipe" {
                     uvLeft = uv;
                 #elif _HORIZONTAL
                     viewDirection = normalize(i.posWorld.xyz-_WorldSpaceCameraPos.xyz);
+                    viewDirection = mul(_SpaceMatrix,viewDirection);
                     //viewDirection = normalize(_WorldSpaceCameraPos.xyz-i.posWorld.xyz);
-                    viewDirection = lerp(i.vertex,viewDirection,_ViewScaler);
+                    viewDirection = lerp(i.vertex,viewDirection*float3(_FlipX,1,1),_ViewScaler);
                 //rotate
                     viewDirection = float3(viewDirection.x*angleCos + viewDirection.z*angleSin , viewDirection.y , -viewDirection.x*angleSin +viewDirection.z*angleCos);
+                    
+                    
                     viewDirection.xy  *= _UpsideDown > 0 ? -1 : 1;
                     float2 tc = ToRadialCoords(viewDirection);
                     bool bak = false;
@@ -157,12 +167,7 @@ Shader "_MOR/360 Video Wipe" {
                     tc.x *= 0.5;
                     uvLeft.x *= 0.5;
                     float2 uv = tc;
-                
-                    /*return  tex2D (_MainTex, tc);
-                    float viewAngle = atan2(-viewDirection.r,-viewDirection.g)/(2*UNITY_PI);
-                    float angleVerticle = acos(viewDirection.b)/UNITY_PI;
-                    float uCoord = (unity_StereoEyeIndex ==  0) ? (angleVerticle*0.5) : (angleVerticle*0.5+0.5);
-                    float2 uv = float2 ( saturate(uCoord), saturate((viewAngle*2)+1));*/
+
                 #else
                     float2 uv = float2 (u+0.5, StereoEyeIndex(acos(viewDirection.g)/UNITY_PI));
                     float2 tc = ToRadialCoords(viewDirection);
@@ -178,6 +183,7 @@ Shader "_MOR/360 Video Wipe" {
                 float4 cLeft = tex2D(_MainTex,uvLeft);
                 
                 c = lerp(c,cLeft,_EyeLerp);
+                
                 c.rgb *= _Exposure;
                 c.a = _Alpha;
                 if(_DoClip==0)
@@ -187,6 +193,7 @@ Shader "_MOR/360 Video Wipe" {
                 #if _LINEAR_CONVERT
                     c = fixed4(GammaToLinearSpace(c.rgb), c.a);
                 #endif
+                c.rgb *= _Tint.rgb * unity_ColorSpaceDouble.rgb;
                 //c.rgb = _LinearConvert > 0 ? pow(c.rgb, 2.2) : c.rgb;
                 return c;
             }

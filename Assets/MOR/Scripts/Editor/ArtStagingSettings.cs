@@ -299,6 +299,7 @@ namespace MOR.Museum {
 						settings.colliderValidationState = ArtStagingSettings.ValidationState.CriticalFail;
 					} else {
 						settings.colliderValidationState = ArtStagingSettings.ValidationState.Valid;
+						errorMessage = "";
 					}
 
 					settings.Save();
@@ -317,13 +318,14 @@ namespace MOR.Museum {
 						warningMessage = "Create a custom skybox local to prefab. Scene Skybox will not transfer to MOR.";
 					} else {
 						settings.skyboxValidationState = ArtStagingSettings.ValidationState.Valid;
+						warningMessage = "";
 					}
 
 					settings.Save();
 				}
 			}
 
-			if (settings.skyboxValidationState == ArtStagingSettings.ValidationState.HasWarnings || settings.skyboxValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
+			if (settings.skyboxValidationState == ArtStagingSettings.ValidationState.NotValidated || settings.skyboxValidationState == ArtStagingSettings.ValidationState.HasWarnings || settings.skyboxValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
 				GUILayout.Space(10);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 50;
@@ -461,6 +463,17 @@ namespace MOR.Museum {
 			if (string.IsNullOrEmpty(warningMessage) == false) {
 				EditorGUILayout.HelpBox(warningMessage, MessageType.Warning);
 			}
+			GUILayout.Space(20);
+			boxRect = GUILayoutUtility.GetRect(20, 18);
+			if (GUI.Button(boxRect, "Reset")) {
+				settings.sceneValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.modelsValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.textureValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.materialValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.lightProbeValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.colliderValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.skyboxValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+			}
 
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
@@ -507,6 +520,8 @@ namespace MOR.Museum {
 			}
 
 			skyRenderer.sharedMaterial = RenderSettings.skybox; //TODO : Make sure this switches to a MOR skybox shader if it isn't already.
+			
+			
 			Transform newSkyboxTransform = newSkybox.transform;
 			newSkyboxTransform.position = prefabBounds.center;
 			float radius = (prefabBounds.max.magnitude + BOUNDS_EXTRA_FOR_SKYBOX);//magnitude will be distance to furthest corner we'd sweep a radius from (plus a little extra)
@@ -547,13 +562,23 @@ namespace MOR.Museum {
 			if (settings.isThroughPortal == false) {
 				return true;
 			}
-
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			Collider[] colliders  = scenePrefab.GetComponentsInChildren<Collider>();
+			if (colliders.Length == 0) {
+				settings.colliderValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+				errorMessage = "No Collision in scene. Add collision to floors and walls.";
+				return false;
+			}
+			
 			TeleportArea[] teleportAreas = settings.rootPrefabSource.GetComponentsInChildren<TeleportArea>();
 			if (teleportAreas != null && teleportAreas.Length > 0) {
 				return true;
 			}
-
-			Debug.LogError($"No Teleport Areas set. Please add a 'Teleport Area' modifier to floor colliders.");
+			settings.colliderValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+			errorMessage = "No Teleport Areas set. Please add a 'Teleport Area' modifier to floor colliders.";
+			
+			Debug.LogError($"No Teleport Areas set. Please add a 'Teleport Area' modifier to floor colliders.",colliders[0]);
 			return false;
 		}
 
@@ -668,7 +693,8 @@ namespace MOR.Museum {
 			MeshRenderer[] meshes = scenePrefab.GetComponentsInChildren<MeshRenderer>(true);
 			int i = 0;
 			ReflectionProbe[] probes = scenePrefab.GetComponentsInChildren<ReflectionProbe>(true);
-
+			settings.lightProbeValidationState = ArtStagingSettings.ValidationState.Valid;
+			errorMessage = "";
 			foreach (MeshRenderer meshRenderer in meshes) {
 				MeshRenderer prefabRenderer = PrefabUtility.GetCorrespondingObjectFromSource(meshRenderer);
 
@@ -727,10 +753,16 @@ namespace MOR.Museum {
 				}
 
 				ReflectionProbe diskProbe = PrefabUtility.GetCorrespondingObjectFromSource(probe);
-
+				if (diskProbe == null) {
+					Debug.Log($"Reflection probe not part of prefab.", probe.gameObject);
+					this.settings.lightProbeValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+					errorMessage = $"Custom Reflection Probe must be part of Prefab. = {probe}";
+					continue;
+				}
 				prop = s.FindProperty("m_ProbeAnchor");
-				if (prop == null) {
-					Debug.Log($"m_ProbeAnchor not a property we could find", meshRenderer.gameObject);
+				if (prop == null || prop.propertyType != SerializedPropertyType.ObjectReference) {
+					
+					Debug.Log($"m_ProbeAnchor not a property we could find. {prop} - type = {(prop==null?"":prop.propertyType.ToString())}", meshRenderer.gameObject);
 					continue;
 				}
 
@@ -738,8 +770,6 @@ namespace MOR.Museum {
 				//GameObject assetRoot = PrefabUtility.GetCorrespondingObjectFromOriginalSource(meshRenderer.gameObject);
 				prop.objectReferenceValue = diskProbe.transform;
 				prefabRenderer.probeAnchor = diskProbe.transform;
-				Debug.Log($"{i++} - {meshRenderer.name}");
-				Debug.Log(meshRenderer.probeAnchor);
 				//PrefabUtility.ApplyPropertyOverride(prop,path,InteractionMode.AutomatedAction );
 				EditorUtility.SetDirty(prefabRenderer);
 				s.ApplyModifiedPropertiesWithoutUndo();
@@ -1007,7 +1037,7 @@ namespace MOR.Museum {
 				}
 			} else {
 				warningMessage = "";
-				Debug.Log($"No property modification {modifications} - {overrides}");
+				//Debug.Log($"No property modification {modifications} - {overrides}");
 			}
 
 

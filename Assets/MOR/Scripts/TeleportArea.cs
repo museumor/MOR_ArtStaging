@@ -11,6 +11,7 @@ using UnityEditor;
 /// Our version of TeleportArea with Dimension knowledge
 /// </summary>
 namespace MOR.Industries {
+	[AddComponentMenu("MOR/Teleport Area MOR")]
 	public class TeleportArea : MonoBehaviour {
 		public UnityEvent onEnter;
 		public UnityEvent onExit;
@@ -71,5 +72,31 @@ namespace MOR.Industries {
 		//public bool StickToSurface;// => CompareTag(Teleport.STICK_TO_SURFACE_TAG);
 
 	}
+#if UNITY_EDITOR
 
+	[CustomEditor(typeof(TeleportArea))]
+	[CanEditMultipleObjects]
+	public class TeleportAreaEditor : Editor {
+
+		public override void OnInspectorGUI() {
+			TeleportArea teleportArea = (TeleportArea) target;
+			//Leaving this check here in case we decide to remove the automatic layer setting below.
+			/*string warning = WarningsCheck(teleportArea);
+			if (string.IsNullOrEmpty( warning)==false) {
+			    EditorGUILayout.HelpBox(warning,MessageType.Warning);
+			}*/
+			//Automatically set layer
+			//if (!teleportArea.disalowTeleport) {
+				//teleportArea.gameObject.layer = LayerMask.NameToLayer("FloorOther");
+				teleportArea.gameObject.layer = LayerMask.NameToLayer("Floor");
+
+			//}
+
+			//Set tag if applicable.
+
+
+			DrawDefaultInspector();
+		}
+	}
+#endif
 }

@@ -69,7 +69,7 @@ namespace MOR.Museum
             if (PrefabUtility.IsPartOfAnyPrefab(gameObject)) {
 
                 GameObject assetRoot = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
-                string path = AssetDatabase.GetAssetPath(assetRoot);
+                string path = AssetDatabase.GetAssetPath(transform.root);
                 if (PrefabUtility.IsPartOfAnyPrefab(this) == false) {
                     PrefabUtility.ApplyAddedComponent(this,path,InteractionMode.AutomatedAction);
                 }                
