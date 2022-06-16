@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.Formats.Fbx.Exporter;
 using UnityEditor.SceneManagement;
 using UnityEngine.Playables;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -30,6 +31,7 @@ namespace MOR.Museum {
 
 		public bool isThroughPortal;
 		public GameObject rootPrefabSource;
+		public GameObject MORPlaceablePrefab;
 		[ReadOnly] public bool playableDirectorOK = true;
 		[ReadOnly] public ValidationState colliderValidationState;
 		public ValidationState skyboxValidationState;
@@ -140,7 +142,7 @@ namespace MOR.Museum {
 		}
 
 
-		protected void OnGUI() {
+		protected void OnGUI(){
 			if (initialized == false) {
 				RootHasMORComponents();
 				initialized = true;
@@ -177,8 +179,28 @@ namespace MOR.Museum {
 			boxRect.x += 12;
 
 			EditorGUI.DrawRect(boxRect, settings.GetLightProbeValidState());
+			
+			boxRect.x = 320;
+			boxRect.height = 20;
+			boxRect.width = 170;
+			if (GUI.Button(boxRect, "Reset Checks")) {
+				settings.sceneValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.modelsValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.textureValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.materialValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.lightProbeValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.colliderValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.skyboxValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+			}
+
+
+
+
+
 			GUILayout.Space(10);
 
+			
+			
 			boxRect = GUILayoutUtility.GetRect(20, 18);
 			GUI.Label(boxRect, "Root Prefab");
 			settings.rootPrefabSource = (GameObject)EditorGUILayout.ObjectField(settings.rootPrefabSource, typeof(GameObject), false);
@@ -191,7 +213,8 @@ namespace MOR.Museum {
 				if (settings.rootPrefabSource == null) {
 					return;
 				}
-			} else {
+			}
+			else {
 				if (componentsOnRoot == false) {
 					if (GUILayout.Button("Add MOR components to Root")) {
 						AddMORComponentsToRootPrefab(settings.rootPrefabSource);
@@ -297,7 +320,8 @@ namespace MOR.Museum {
 					bool checkResult = CheckColliders();
 					if (checkResult == false) {
 						settings.colliderValidationState = ArtStagingSettings.ValidationState.CriticalFail;
-					} else {
+					}
+					else {
 						settings.colliderValidationState = ArtStagingSettings.ValidationState.Valid;
 						errorMessage = "";
 					}
@@ -316,34 +340,51 @@ namespace MOR.Museum {
 					if (checkResult == false) {
 						settings.skyboxValidationState = ArtStagingSettings.ValidationState.CriticalFail;
 						warningMessage = "Create a custom skybox local to prefab. Scene Skybox will not transfer to MOR.";
-					} else {
+					}
+					else {
 						settings.skyboxValidationState = ArtStagingSettings.ValidationState.Valid;
 						warningMessage = "";
 					}
 
 					settings.Save();
 				}
+			
+
+				if (settings.skyboxValidationState == ArtStagingSettings.ValidationState.NotValidated || settings.skyboxValidationState == ArtStagingSettings.ValidationState.HasWarnings ||
+				    settings.skyboxValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
+					GUILayout.Space(10);
+
+					boxRect = GUILayoutUtility.GetRect(20, 18);
+					boxRect.x += 50;
+					boxRect.width = 200;
+					if (GUI.Button(boxRect, "Dismiss Skybox check")) {
+						settings.skyboxValidationState = ArtStagingSettings.ValidationState.Valid;
+					}
+
+					if (settings.skyboxValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
+						GUILayout.Space(10);
+						boxRect = GUILayoutUtility.GetRect(20, 18);
+						boxRect.x += 50;
+						boxRect.width = 200;
+						if (GUI.Button(boxRect, "Create Local skybox")) {
+							CreateSkybox(FindSceneInstance(settings.rootPrefabSource));
+							settings.skyboxValidationState = ArtStagingSettings.ValidationState.Valid;
+							warningMessage = null;
+						}
+					}
+					else if (settings.skyboxValidationState == ArtStagingSettings.ValidationState.HasWarnings) {
+						GUILayout.Space(10);
+						boxRect = GUILayoutUtility.GetRect(20, 18);
+						boxRect.x += 50;
+						boxRect.width = 200;
+						if (GUI.Button(boxRect, "ConvertSkybox")) {
+							this.ChangeSkyboxShaderToMORLightmap();
+						}
+					}
+				}
 			}
 
-			if (settings.skyboxValidationState == ArtStagingSettings.ValidationState.NotValidated || settings.skyboxValidationState == ArtStagingSettings.ValidationState.HasWarnings || settings.skyboxValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
-				GUILayout.Space(10);
-				boxRect = GUILayoutUtility.GetRect(20, 18);
-				boxRect.x += 50;
-				boxRect.width = 200;
-				if (GUI.Button(boxRect, "Dismiss")) {
-					settings.skyboxValidationState = ArtStagingSettings.ValidationState.Valid;
-				}
 
-				GUILayout.Space(10);
-				boxRect = GUILayoutUtility.GetRect(20, 18);
-				boxRect.x += 50;
-				boxRect.width = 200;
-				if (GUI.Button(boxRect, "Create Local skybox")) {
-					CreateSkybox(FindSceneInstance(settings.rootPrefabSource));
-					settings.skyboxValidationState = ArtStagingSettings.ValidationState.Valid;
-					warningMessage = null;
-				}
-			}
 
 			//Texture Check.
 			GUILayout.Space(10);
@@ -437,12 +478,11 @@ namespace MOR.Museum {
 				GUILayout.EndHorizontal();
 
 				if (settings.lightProbeValidationState == ArtStagingSettings.ValidationState.Valid) {
-					GUILayout.BeginHorizontal();
+					
 					{
 						GUILayout.Space(10);
 						boxRect = GUILayoutUtility.GetRect(20, 18);
-
-
+						
 						boxRect.x += 20;
 						boxRect.width = 220;
 						if (GUI.Button(boxRect, "Set Reflection Probes to Custom")) {
@@ -450,7 +490,7 @@ namespace MOR.Museum {
 							//settings.lightProbeValidationState = ArtStagingSettings.ValidationState.HasWarnings;
 						}
 					}
-					GUILayout.EndHorizontal();
+					
 				}
 			}
 
@@ -463,20 +503,156 @@ namespace MOR.Museum {
 			if (string.IsNullOrEmpty(warningMessage) == false) {
 				EditorGUILayout.HelpBox(warningMessage, MessageType.Warning);
 			}
-			GUILayout.Space(20);
-			boxRect = GUILayoutUtility.GetRect(20, 18);
-			if (GUI.Button(boxRect, "Reset")) {
-				settings.sceneValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.modelsValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.textureValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.materialValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.lightProbeValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.colliderValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.skyboxValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+
+			if (settings.sceneValidationState == ArtStagingSettings.ValidationState.Valid) {
+				//Setup an area for setting up localized lightmap settings, analogous to StoreLighmapControl(sic)
+				GUILayout.Space(20);
+				boxRect = GUILayoutUtility.GetRect(20, 8);
+				boxRect.height = 1;
+				EditorGUI.DrawRect(boxRect, Color.black);
+
+				GUILayout.Space(8);
+				boxRect = GUILayoutUtility.GetRect(20, 18);
+				boxRect.x += 20;
+				boxRect.width = 270;
+				GUI.Label(boxRect, "Localize Lightmaps");
+
+				GUILayout.Space(20);
+				boxRect = GUILayoutUtility.GetRect(20, 18);
+				boxRect.x += 40;
+				boxRect.width = 270;
+				if (GUI.Button(boxRect, "Store Lightmap Settings on Objects")) {
+					StoreLightmapApply();
+				}
+
+				GUILayout.Space(12);
+				boxRect = GUILayoutUtility.GetRect(20, 18);
+				boxRect.x += 40;
+				boxRect.width = 270;
+				if (GUI.Button(boxRect, "Set shaders to MOR Lightmap")) {
+					SetShadersToMORLightmap();
+				}
+
+				EditorGUILayout.HelpBox("MOR Lightmap material is Standard analogous, but works in conjunction with 'StoreLightmapOffset' script to " +
+				                        "apply lightmaps on a placeable prefab.", MessageType.Info);
+				GUILayout.Space(12);
+				boxRect = GUILayoutUtility.GetRect(20, 18);
+				boxRect.x += 40;
+				boxRect.width = 270;
+				if (GUI.Button(boxRect, "Make MOR Placeable Prefab Variant")) {
+					MakeMORPlaceablePrefabVariant();
+				}
+
+				EditorGUILayout.HelpBox("This will make a variant prefab which will have dynamic shadowcasting disabled as an override, as that is in the lightmap " +
+				                        "and will handle disabling lights etc.", MessageType.Info);
+				boxRect = GUILayoutUtility.GetRect(20, 18);
+				boxRect.x += 40;
+				boxRect.width = 270;
+				if (GUI.Button(boxRect, "CalculateUsedTexturesSize")) {
+					CalculateUsedTexturesSize();
+				}
+				boxRect = GUILayoutUtility.GetRect(20, 18);
+				boxRect.x += 40;
+				boxRect.width = 270;
+				if (GUI.Button(boxRect, "CalculateUsedModelSize")) {
+					CalculateUsedModelSize();
+				}
+				
+
+
 			}
 
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
+
+
+		public void CalculateUsedTexturesSize(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(diskPrefab));
+			int fileSize = 0;
+			foreach (var dependency in dependencies) {
+				if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(Texture2D)) {
+					var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(dependency);
+					var texMemSize = Profiler.GetRuntimeMemorySizeLong(tex);
+					Debug.Log($"{(texMemSize/(2*1048576f)) : 0.00}MB - {dependency}");
+					fileSize += (int)texMemSize;
+				}
+			}
+			Debug.Log($"Total Texture Size: {(fileSize/(2*1048576f)) : 0.00}MB");
+		}
+		
+		public void CalculateUsedModelSize(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(diskPrefab));
+			int fileSize = 0;
+			foreach (var dependency in dependencies) {
+				if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(GameObject)) {
+					var tex = AssetDatabase.LoadAssetAtPath<GameObject>(dependency);
+					var info =new  FileInfo(dependency);
+					//var texMemSize = Profiler.GetRuntimeMemorySizeLong(tex);
+					var texMemSize = info.Length;
+					Debug.Log($"{(texMemSize/(1048576f)) : 0.00}MB - {dependency}");
+					fileSize += (int)texMemSize;
+				}
+			}
+			Debug.Log($"Total Model Size: {(fileSize/(1048576f)) : 0.00}MB");
+		}
+		
+		
+		public void MakeMORPlaceablePrefabVariant(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			//GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			GameObject prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(diskPrefab);
+			string prefabPath = AssetDatabase.GetAssetPath(diskPrefab);
+			string newPath = Path.Combine(Path.GetDirectoryName(prefabPath), Path.GetFileNameWithoutExtension(prefabPath) + "_MORArtwork.prefab");
+			
+			//Turn off shadowcasting on objects, as this should be handled by the lightmap renderer.
+			MeshRenderer[] allRenderers = prefabInstance.GetComponentsInChildren<MeshRenderer>(true);
+			foreach (MeshRenderer meshRenderer in allRenderers)
+			{
+				SerializedObject serialized = new SerializedObject(meshRenderer);
+				SerializedProperty prop = serialized.FindProperty("m_CastShadows");
+				prop.intValue = (int)UnityEngine.Rendering.ShadowCastingMode.Off;
+				serialized.ApplyModifiedProperties();
+			}
+			//Add override to disable all lights
+			Light[] lights = prefabInstance.GetComponentsInChildren<Light>(true);
+			foreach (Light light in lights) {
+				SerializedObject serializedObject = new SerializedObject(light);
+				var prop = serializedObject.FindProperty("m_Enabled");
+				prop.boolValue = false;
+				serializedObject.ApplyModifiedProperties();
+			}
+			//EditorUtility.SetDirty();
+			var newPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(prefabInstance, newPath,InteractionMode.AutomatedAction);
+			settings.MORPlaceablePrefab = newPrefab;
+			DestroyImmediate(prefabInstance);
+		}
+		
+		
+		
+		public void StoreLightmapApply(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			var lightmapControl = scenePrefab.GetComponentInChildren<StoreLighmapControl>();
+			if (lightmapControl == null) {
+				AddMORComponentsToRootPrefab(diskPrefab);
+				lightmapControl = scenePrefab.GetComponentInChildren<StoreLighmapControl>();
+			}
+			lightmapControl.AddAndUpdateComponentsToLightmapped();//Do tha thing
+		}
+		public void SetShadersToMORLightmap(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			var lightmapControl = scenePrefab.GetComponentInChildren<StoreLighmapControl>();
+			if (lightmapControl == null) {
+				AddMORComponentsToRootPrefab(diskPrefab);
+				lightmapControl = scenePrefab.GetComponentInChildren<StoreLighmapControl>();
+			}
+			lightmapControl.ChangeShadersToMORLightmap();//Do tha thing
+		}
+		
+
 
 		public static Bounds GetBounds(GameObject obj,bool includeInactive = false) {
 			Bounds bounds = new Bounds();
@@ -504,6 +680,8 @@ namespace MOR.Museum {
 			Bounds prefabBounds = GetBounds(rootScenePrefab);
 			
 			GameObject newSkybox = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			newSkybox.name = "MOR_LocalSkybox";
+			newSkybox.tag = "NewSkybox";
 			Collider skyCollider = newSkybox.GetComponent<Collider>();
 			DestroyImmediate(skyCollider);
 			MeshRenderer skyRenderer = newSkybox.GetComponent<MeshRenderer>();
@@ -520,8 +698,12 @@ namespace MOR.Museum {
 			}
 
 			skyRenderer.sharedMaterial = RenderSettings.skybox; //TODO : Make sure this switches to a MOR skybox shader if it isn't already.
-			
-			
+			var shaderName = skyRenderer.sharedMaterial.shader.name;
+			if (shaderName != "_MOR/360 Video Wipe") {
+				settings.skyboxValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+				warningMessage = "Try using '360 Video Wipe as skybox shader. (set to Mono). See MOR/Art/Shaders/Skybox for an example";
+			}
+
 			Transform newSkyboxTransform = newSkybox.transform;
 			newSkyboxTransform.position = prefabBounds.center;
 			float radius = (prefabBounds.max.magnitude + BOUNDS_EXTRA_FOR_SKYBOX);//magnitude will be distance to furthest corner we'd sweep a radius from (plus a little extra)
@@ -532,6 +714,45 @@ namespace MOR.Museum {
 			EditorUtility.SetDirty(rootScenePrefab);
 			PrefabUtility.ApplyAddedGameObject(newSkybox, path, InteractionMode.AutomatedAction);
 		}
+
+		
+		public void ChangeSkyboxShaderToMORLightmap() {
+			
+			var shader = Shader.Find("_MOR/360 Video Wipe");
+			if (shader == null) {
+				Debug.LogError("Failed to find _MOR/60 Video Wipe shader");
+				return;
+			}
+			
+			var mat = RenderSettings.skybox;
+			if (mat == null) {
+				Debug.LogWarning("No skybox assigned (Lighting>Environment>Skybox Material");
+				return;
+			}
+
+			if (mat.shader != null && mat.shader.name == "_MOR/360 Video Wipe") {
+				Debug.Log("Material already has the MOR shader applied");
+				return;
+			}
+			var originalPath = AssetDatabase.GetAssetPath(mat);
+			string pathRoot = Path.GetFileNameWithoutExtension(originalPath);
+			pathRoot =Path.Combine( Path.GetDirectoryName(originalPath), pathRoot + "_MORSkybox.mat");
+			var newMat = Instantiate(mat);
+			if (newMat.shader != shader) {
+				newMat.shader = shader;
+				newMat.SetInt("_MonoMode", 1);
+				newMat.SetInt("_StencilComp", 0);
+			}			
+			AssetDatabase.CreateAsset(newMat, pathRoot);
+			Debug.Log($"Saving new material as :  {pathRoot}");
+			var localSkybox = GameObject.FindWithTag("LocalSkybox");
+			if (localSkybox == null) {
+				Debug.LogWarning("No Local Skybox. New Material not applied");
+				return;
+			}
+		}
+
+
 
 		/// <summary>
 		/// Skyboxes might need to be created for other dimension.
