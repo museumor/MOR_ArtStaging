@@ -39,7 +39,7 @@ Shader "_MOR/Standard/Custom Lightmap"
 
 		_DetailMask("Detail Mask", 2D) = "white" {}
 
-		_DetailAlbedoMap("Detail Albedo x2", 2D) = "grey" {}
+		_DetailAlbedoMap("Detail Albedo x2", 2D) = "white" {}
 		_DetailNormalMapScale("Scale", Float) = 1.0
 		[Normal]_DetailNormalMap("Normal Map", 2D) = "bump" {}
 
@@ -151,7 +151,7 @@ Shader "_MOR/Standard/Custom Lightmap"
 			#pragma shader_feature _EMISSION
 
             #pragma shader_feature_local _METALLICGLOSSMAP
-            #pragma shader_feature_local _DETAIL_MULX2
+            //#pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local _GLOSSYREFLECTIONS_OFF
@@ -197,8 +197,11 @@ Shader "_MOR/Standard/Custom Lightmap"
             
             half4 fragForwardBase_MOR (VertexOutputForwardBaseMOR i,fixed vface : VFACE) : SV_Target   // backward compatibility (this used to be the fragment entry function)
             {
-                
+                #if SHADER_API_MOBILE
+            	return fragForwardBase_MOR_Internal(i);
+            	#else
                 return fragForwardBase_MOR_Internal(i,vface);
+            	#endif
             }
             
 			ENDCG
@@ -226,7 +229,7 @@ Shader "_MOR/Standard/Custom Lightmap"
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature_local _ _SPECULARHIGHLIGHTS_OFF
-            #pragma shader_feature_local ___ _DETAIL_MULX2
+            //#pragma shader_feature_local ___ _DETAIL_MULX2
             #pragma shader_feature_local _PARALLAXMAP
             
 			#pragma multi_compile_fwdadd_fullshadows
@@ -286,7 +289,7 @@ Shader "_MOR/Standard/Custom Lightmap"
             #pragma shader_feature _EMISSION
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma shader_feature_local _DETAIL_MULX2
+            //#pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
 
 
