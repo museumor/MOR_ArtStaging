@@ -67,11 +67,12 @@ namespace MOR.Museum {
 			//PrefabUtility.ApplyObjectOverride(this,path,InteractionMode.AutomatedAction );
 			AssetDatabase.SaveAssets();
 		}
+		
 		/// <summary>
-		/// Turn lghts off in prefab and on in scene
+		/// Turn lights off in prefab and on in scene
 		/// </summary>
 		[Button]
-		public void ApplyLightStateToScene() {
+		public void LightsOffInPrefabOnInScene() {
 			GameObject diskPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
 			StoreLighmapControl diskComponent = PrefabUtility.GetCorrespondingObjectFromSource(this);
 			PrefabAssetType type = PrefabUtility.GetPrefabAssetType(diskPrefab);
@@ -90,7 +91,6 @@ namespace MOR.Museum {
 				prefabLight.gameObject.SetActive(false);
 				EditorUtility.SetDirty(prefabLight);
 			}
-
 		}	
 
 		/// <summary>
@@ -153,10 +153,10 @@ namespace MOR.Museum {
 		}
 
 		[Button]
-		public void ChangeShader() {
+		public void ChangeShadersToMORLightmap() {
 			var shader = Shader.Find("_MOR/Standard/Custom Lightmap");
 			if (shader != null) {
-				Debug.Log("FOUND!");
+				//Debug.Log("FOUND!");
 			}
 
 			MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>(true);

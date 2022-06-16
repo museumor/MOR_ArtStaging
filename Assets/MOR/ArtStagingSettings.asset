@@ -12,13 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4ac501b8a01d4749b7e109729e7aad8, type: 3}
   m_Name: ArtStagingSettings
   m_EditorClassIdentifier: 
-  sceneValidationState: 0
-  modelsValidationState: 0
-  textureValidationState: 0
-  materialValidationState: 0
-  lightProbeValidationState: 0
+  sceneValidationState: 1
+  modelsValidationState: 1
+  textureValidationState: 1
+  materialValidationState: 1
+  lightProbeValidationState: 1
   isThroughPortal: 0
-  rootPrefabSource: {fileID: 0}
+  rootPrefabSource: {fileID: 8655946090871926911, guid: 23160e32a82ee334989e1b4ed67d583c,
+    type: 3}
+  MORPlaceablePrefab: {fileID: 8897081467278660858, guid: 684622158d0059a45b3da92acabd2756,
+    type: 3}
   playableDirectorOK: 1
-  colliderValidationState: 0
-  skyboxValidationState: 0
+  colliderValidationState: 1
+  skyboxValidationState: 1
