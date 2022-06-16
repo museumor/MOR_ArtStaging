@@ -46,6 +46,8 @@ namespace MOR.Museum
             mat.SetTextureScale("_LightMap", new Vector2(lightmapCoords.x, lightmapCoords.y));
             mat.SetTextureOffset("_LightMap", new Vector2(lightmapCoords.z, lightmapCoords.w));
         }
+        
+        
         [Button]
         public void StoreCoordinate()
         {
@@ -67,19 +69,23 @@ namespace MOR.Museum
             EditorUtility.SetDirty(this);
 
             if (PrefabUtility.IsPartOfAnyPrefab(gameObject)) {
-
-                GameObject assetRoot = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
-                string path = AssetDatabase.GetAssetPath(transform.root);
+                var prefabRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(this.gameObject);
+                string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(prefabRoot);
+                if (string.IsNullOrEmpty(path)) {
+                    Debug.LogWarning($"No path to prefab. Root = {prefabRoot} | ",gameObject);
+                    return;
+                }
                 if (PrefabUtility.IsPartOfAnyPrefab(this) == false) {
                     PrefabUtility.ApplyAddedComponent(this,path,InteractionMode.AutomatedAction);
-                }                
-                
-                try {
+                }
+                //try {
+                if(PrefabUtility.HasPrefabInstanceAnyOverrides(prefabRoot,false)) {
                     PrefabUtility.ApplyObjectOverride(this, path, InteractionMode.AutomatedAction);
                 }
-                catch (Exception e) {
-                    Debug.LogError(e.Message,gameObject);
-                }
+                //}
+               // catch (Exception e) {
+                //   Debug.LogError(e.Message,gameObject);
+               // }
             }
         }
 
