@@ -223,6 +223,7 @@ namespace MOR.Museum {
 				}
 			}
 
+			// We likely don't want this for 'Metaverse' type version of this tool, as all will be in their pocket universes or however we end up setting things up.
 			settings.ThroughPortal = GUILayout.Toggle(settings.isThroughPortal, "Other Dimension Scene");
 
 			GUILayout.BeginHorizontal();
@@ -398,6 +399,7 @@ namespace MOR.Museum {
 				boxRect.x += 20;
 				boxRect.width = 180;
 				if (GUI.Button(boxRect, "Check Textures")) {
+					textureSize = -1;
 					CheckTextures(settings.rootPrefabSource);
 				}
 
@@ -545,40 +547,166 @@ namespace MOR.Museum {
 
 				EditorGUILayout.HelpBox("This will make a variant prefab which will have dynamic shadowcasting disabled as an override, as that is in the lightmap " +
 				                        "and will handle disabling lights etc.", MessageType.Info);
-				boxRect = GUILayoutUtility.GetRect(20, 18);
+				
+				
+				/*boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 40;
 				boxRect.width = 270;
 				if (GUI.Button(boxRect, "CalculateUsedTexturesSize")) {
-					CalculateUsedTexturesSize();
+					
 				}
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 40;
 				boxRect.width = 270;
 				if (GUI.Button(boxRect, "CalculateUsedModelSize")) {
+					
+				}
+				*/
+				if (textureSize == -1) {
+					CalculateUsedTexturesSize();
 					CalculateUsedModelSize();
 				}
+
+				GUILayout.BeginHorizontal();
+				boxRect = GUILayoutUtility.GetRect(INDICATOR_WIDTH, 18);
+				boxRect.x += 10;
+				boxRect.width = INDICATOR_WIDTH;
+				float texInMB = (float)textureSize / BYTES_TO_MEGABYTES2;
+				EditorGUI.DrawRect(boxRect, GetColorForTextureFileSizeLimits((int)texInMB));
+				boxRect.width = 350;
+				boxRect.x += 10;
+				GUI.Label( boxRect,$"  Approximate Texture usage : {texInMB : 0.00} MB in {textureCount} textures");
+				GUILayout.EndHorizontal();		
 				
+				//GUILayout.BeginHorizontal();
+				boxRect = GUILayoutUtility.GetRect(INDICATOR_WIDTH, 9);
+				boxRect.x += 30;
+				boxRect.width = INDICATOR_WIDTH;
+				DrawBoxTextureMeter((int)texInMB,boxRect);
+				//GUILayout.EndHorizontal();
+				
+				
+				GUILayout.Label( $"\tLightmaps - {lightmapCount}");
+				GUILayout.Label($"\tLargest Texture Dimension {largestDimension}\n");
+				GUILayout.Label( $"  Approximate Model usage : {((float)modelSize / BYTES_TO_MEGABYTES2) : 0.00} MB");
 
 
 			}
-
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
+		Color orange = new Color(1f,0.5f,0f);
+		private void DrawBoxTextureMeter(int texInMB,Rect boxRect){
+			
+			boxRect.width = INDICATOR_WIDTH * 2;
+			int offset = INDICATOR_WIDTH * 2;
+			int halfOffset = INDICATOR_WIDTH;
+			float multiplier = 1;
+			float offMult = 0.5f;			
+			
+			//This makes the first 100MB tripple size so it's more 'Logarithmic' in display to encourace less texture useage
+			
+			EditorGUI.DrawRect(boxRect, Color.green);
+			multiplier = texInMB < 33 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.green*multiplier);
+			multiplier = texInMB < 65 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.green*multiplier);
+			multiplier = texInMB < 90 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.green*multiplier);
+			
+			
+			// Linear from here on
+			multiplier = texInMB < 106 ? offMult : 1f;
+			boxRect.width = INDICATOR_WIDTH+1;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.cyan * multiplier);
+			boxRect.width = INDICATOR_WIDTH;
+			multiplier = texInMB < 155 ? offMult : 1f;
+			boxRect.x += halfOffset;			EditorGUI.DrawRect(boxRect, Color.yellow * multiplier);
+			
+			boxRect.width = INDICATOR_WIDTH * 2;
+			multiplier = texInMB < 200 ? offMult : 1f;
+			boxRect.x += halfOffset;			EditorGUI.DrawRect(boxRect, Color.yellow * multiplier);
+			multiplier = texInMB < 300 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, orange * multiplier);
+			multiplier = texInMB < 400 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.red * multiplier);
+			multiplier = texInMB < 500 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.red * multiplier);
+			multiplier = texInMB < 600 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.red * multiplier);
+			multiplier = texInMB < 700 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.red * multiplier);
+			multiplier = texInMB < 800 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.red * multiplier);
+			multiplier = texInMB < 900 ? offMult : 1f;
+			boxRect.x += offset;			EditorGUI.DrawRect(boxRect, Color.magenta * multiplier);
 
-
+		}
+		private Color GetColorForTextureFileSizeLimits(int texInMB){
+			Color textureSizeIndicatorColor = Color.green;
+			if (texInMB > 1000) {
+				textureSizeIndicatorColor = Color.magenta;
+			}else if (texInMB > 400) {
+				textureSizeIndicatorColor = Color.red;
+			}else if (texInMB > 300) {
+				textureSizeIndicatorColor = orange;
+			}
+			else if (texInMB > 155) {
+				textureSizeIndicatorColor = Color.yellow;
+			}else if (texInMB > 106) {
+				textureSizeIndicatorColor = Color.cyan;
+			}
+			return textureSizeIndicatorColor;
+		}
+		private int textureSize = -1;
+		private int textureCount = 0;
+		private int modelSize = -1;
+		private int lightmapCount = -1;
+		private const int BYTES_TO_MEGABYTES =1048576;
+		private const int BYTES_TO_MEGABYTES2 = 2 * BYTES_TO_MEGABYTES;
+		private Vector2 largestDimension;
 		public void CalculateUsedTexturesSize(){
 			GameObject diskPrefab = settings.rootPrefabSource;
 			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(diskPrefab));
 			int fileSize = 0;
+			
+			var texturesBySize = new Dictionary<Vector2Int, int>();
+			lightmapCount = 0;
+			largestDimension = Vector2.zero;
+			textureCount = 0;
 			foreach (var dependency in dependencies) {
 				if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(Texture2D)) {
 					var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(dependency);
+					if (Path.GetFileName(dependency).StartsWith("Lightmap")) {
+						lightmapCount += 1;
+					}
+					else {
+						int thisSize = tex.width * tex.height;
+						int biggestYet =(int) (largestDimension.x * largestDimension.y);
+						if (thisSize > biggestYet) {
+							largestDimension = new Vector2(tex.width,tex.height);
+						}
+
+						var key = new Vector2Int(tex.width, tex.height);
+						if (texturesBySize.ContainsKey(key) == false) {
+							texturesBySize[key] = 1;
+						}
+						else {
+							texturesBySize[key] += 1;
+						}
+					}
+
+					textureCount += 1;
 					var texMemSize = Profiler.GetRuntimeMemorySizeLong(tex);
-					Debug.Log($"{(texMemSize/(2*1048576f)) : 0.00}MB - {dependency}");
+					//Debug.Log($"{(texMemSize/(2*1048576f)) : 0.00}MB - {dependency}");
 					fileSize += (int)texMemSize;
 				}
 			}
-			Debug.Log($"Total Texture Size: {(fileSize/(2*1048576f)) : 0.00}MB");
+			
+			textureSize = fileSize;
+			foreach (var key in texturesBySize.Keys) {
+				Debug.Log($"Textures {key} - {texturesBySize[key]}");
+			}
+			//Debug.Log($"Total Texture Size: {(fileSize/(2*1048576f)) : 0.00}MB");
 		}
 		
 		public void CalculateUsedModelSize(){
@@ -591,11 +719,12 @@ namespace MOR.Museum {
 					var info =new  FileInfo(dependency);
 					//var texMemSize = Profiler.GetRuntimeMemorySizeLong(tex);
 					var texMemSize = info.Length;
-					Debug.Log($"{(texMemSize/(1048576f)) : 0.00}MB - {dependency}");
+					//Debug.Log($"{(texMemSize/(1048576f)) : 0.00}MB - {dependency}");
 					fileSize += (int)texMemSize;
 				}
 			}
-			Debug.Log($"Total Model Size: {(fileSize/(1048576f)) : 0.00}MB");
+			modelSize = fileSize;
+			//Debug.Log($"Total Model Size: {(fileSize/(1048576f)) : 0.00}MB");
 		}
 		
 		
