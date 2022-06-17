@@ -134,6 +134,7 @@ Shader "_MOR/Standard Stencil"
     CGINCLUDE
         
         #define UNITY_SETUP_BRDF_INPUT SpecularSetup
+		#define MOR_SETUP_BRDF_INPUT SpecularSetup_MOR
     ENDCG
 		// ------------------------------------------------------------------
 		//  Base forward pass (directional light, emission, lightmaps, ...)
