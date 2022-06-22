@@ -16,6 +16,11 @@ namespace MOR.Museum
         public Texture2D lightmap;
         private static readonly int LightMap = Shader.PropertyToID("_LightMap");
         public void Start() {
+            ApplyMaterialPropertyBlockSettings();
+            //pBlock.SetTextureScale("_LightMap", new Vector2(lightmapCoords.x, lightmapCoords.y));
+            //pBlock.SetTextureOffset("_LightMap", new Vector2(lightmapCoords.z, lightmapCoords.w));
+        }
+        public void ApplyMaterialPropertyBlockSettings(){
             var rend = GetComponent<Renderer>();
             if (rend == null) {
                 return;
@@ -31,10 +36,8 @@ namespace MOR.Museum
                 pBlock.SetTexture(LightMap,lightmap);
             }
             rend.SetPropertyBlock(pBlock);
-            
-            //pBlock.SetTextureScale("_LightMap", new Vector2(lightmapCoords.x, lightmapCoords.y));
-            //pBlock.SetTextureOffset("_LightMap", new Vector2(lightmapCoords.z, lightmapCoords.w));
         }
+        
 #if UNITY_EDITOR
         public UnityEngine.Rendering.ShadowCastingMode shadowcasting;
         [Button]
