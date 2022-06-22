@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using MOR.Industries;
 using UnityEngine;
 using UnityEditor;
@@ -598,12 +599,12 @@ namespace MOR.Museum {
 				DrawBoxTextureMeter((int)texInMB,boxRect);
 				//GUILayout.EndHorizontal();
 				
-				
+				CalculateUsedAudioSize();
 				GUILayout.Label( $"\tLightmaps - {lightmapCount}");
 				GUILayout.Label($"\tLargest Texture Dimension {largestDimension}\n");
 				GUILayout.Label( $"  Approximate Model usage : {((float)modelSize / BYTES_TO_MEGABYTES2) : 0.00} MB");
-
-
+				GUILayout.Label( $"  Approximate Audio usage (compressed): {((float)audioSize / BYTES_TO_MEGABYTES) : 0.00} MB");
+				GUILayout.Label( $"                            (original): {((float)audioSizeRaw / BYTES_TO_MEGABYTES) : 0.00} MB");
 			}
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
@@ -767,8 +768,41 @@ namespace MOR.Museum {
 			modelSize = fileSize;
 			//Debug.Log($"Total Model Size: {(fileSize/(1048576f)) : 0.00}MB");
 		}
-		
-		
+
+
+		public void CalculateUsedAudioSize(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(diskPrefab));
+			int fileSize = 0;
+			int fileSizeR = 0;
+			foreach (var dependency in dependencies) {
+				if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(AudioClip))
+				{
+					var importer = AudioImporter.GetAtPath(dependency);
+					var atype = importer.GetType();
+					BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+					                         | BindingFlags.Static;
+					var field = atype.GetProperty("origSize",bindFlags);
+
+					var sizeO = (int)field.GetValue(importer);
+					//Debug.Log($"{dependency} original size = {sizeO}");
+					var field2 = atype.GetProperty("compSize",bindFlags);
+					var sizeC = (int)field2.GetValue(importer);
+					//Debug.Log($"\tcomp size = {sizeC}");
+
+					var texMemSize = sizeC;
+					//Debug.Log($"{(texMemSize/(1048576f)) : 0.00}MB - {dependency}");
+					fileSize += (int)texMemSize;
+					fileSizeR += sizeO;
+				}
+			}
+			audioSize = fileSize;
+			audioSizeRaw = fileSizeR;
+			//Debug.Log($"Total Audio Size: {(fileSize/(1048576f)) : 0.00}MB");
+		}
+
+		private int audioSize = 0;
+		private int audioSizeRaw = 0;
 		public void MakeMORPlaceablePrefabVariant(){
 			GameObject diskPrefab = settings.rootPrefabSource;
 			//GameObject scenePrefab = FindSceneInstance(diskPrefab);
