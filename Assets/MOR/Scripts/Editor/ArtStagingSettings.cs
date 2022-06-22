@@ -35,7 +35,7 @@ namespace MOR.Museum {
 		[ReadOnly] public bool playableDirectorOK = true;
 		[ReadOnly] public ValidationState colliderValidationState;
 		public ValidationState skyboxValidationState;
-
+		public bool inEditorMORLightmapApply = false; 
 		public void Save() {
 			EditorUtility.SetDirty(this);
 			AssetDatabase.SaveAssetIfDirty(this);
@@ -224,7 +224,7 @@ namespace MOR.Museum {
 			}
 
 			// We likely don't want this for 'Metaverse' type version of this tool, as all will be in their pocket universes or however we end up setting things up.
-			settings.ThroughPortal = GUILayout.Toggle(settings.isThroughPortal, "Other Dimension Scene");
+			settings.ThroughPortal = !GUILayout.Toggle(!settings.isThroughPortal, "Is Standalone Artwork");
 
 			GUILayout.BeginHorizontal();
 			{
@@ -534,9 +534,22 @@ namespace MOR.Museum {
 				if (GUI.Button(boxRect, "Set shaders to MOR Lightmap")) {
 					SetShadersToMORLightmap();
 				}
-
+				
+				
 				EditorGUILayout.HelpBox("MOR Lightmap material is Standard analogous, but works in conjunction with 'StoreLightmapOffset' script to " +
-				                        "apply lightmaps on a placeable prefab.", MessageType.Info);
+				                        "apply lightmaps on a placeable prefab. Offsets are applied at runtime, so editor window display may appear incorrect.", MessageType.Info);
+				GUILayout.BeginHorizontal();
+				settings.inEditorMORLightmapApply = GUILayout.Toggle(settings.inEditorMORLightmapApply, "Apply MOR Lightmaps outside of play mode");
+				if (settings.inEditorMORLightmapApply) {
+					
+					bool buttonPressed = GUILayout.Button("Update MOR Lightmap Display");
+					if (this.inEditorLightmapApply == false || buttonPressed) {
+						inEditorLightmapApply = true; //Store that we've done this on a local variable that likely gets reset on load etc.
+						ApplyMORLightmap();
+					}
+				}
+				GUILayout.EndHorizontal();
+
 				GUILayout.Space(12);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 40;
@@ -546,7 +559,7 @@ namespace MOR.Museum {
 				}
 
 				EditorGUILayout.HelpBox("This will make a variant prefab which will have dynamic shadowcasting disabled as an override, as that is in the lightmap " +
-				                        "and will handle disabling lights etc.", MessageType.Info);
+				                        "and will handle disabling lights etc.", MessageType.None);
 				
 				
 				/*boxRect = GUILayoutUtility.GetRect(20, 18);
@@ -594,7 +607,20 @@ namespace MOR.Museum {
 			}
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
+
+		private void ApplyMORLightmap(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			var lightmapOffsets = scenePrefab.GetComponentsInChildren<StoreLightmapOffset>();
+			foreach (var offseter in lightmapOffsets) {
+				offseter.ApplyMaterialPropertyBlockSettings();
+			}
+		}
+		
+		
+		
 		Color orange = new Color(1f,0.5f,0f);
+		private bool inEditorLightmapApply = false;
 		private void DrawBoxTextureMeter(int texInMB,Rect boxRect){
 			
 			boxRect.width = INDICATOR_WIDTH * 2;
@@ -673,6 +699,7 @@ namespace MOR.Museum {
 			lightmapCount = 0;
 			largestDimension = Vector2.zero;
 			textureCount = 0;
+			
 			foreach (var dependency in dependencies) {
 				if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(Texture2D)) {
 					var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(dependency);
@@ -705,6 +732,20 @@ namespace MOR.Museum {
 			textureSize = fileSize;
 			foreach (var key in texturesBySize.Keys) {
 				Debug.Log($"Textures {key} - {texturesBySize[key]}");
+				if (key != largestDimension) {
+					continue;
+				}
+				foreach (var dependency in dependencies) {
+					if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(Texture2D)) {
+						if (Path.GetFileName(dependency).StartsWith("Lightmap") == false) {
+							var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(dependency);
+							var matchKey = new Vector2(tex.width, tex.height);
+							if (matchKey == key) {
+								Debug.Log($"	tex - {dependency}", tex);
+							}
+						}
+					}
+				}
 			}
 			//Debug.Log($"Total Texture Size: {(fileSize/(2*1048576f)) : 0.00}MB");
 		}
@@ -1539,6 +1580,10 @@ namespace MOR.Museum {
 
 		public static void SplitMeshes(GameObject scenePrefab) {
 			GameObject sourcePrefab = PrefabUtility.GetCorrespondingObjectFromSource(scenePrefab);
+			if (sourcePrefab == null) {
+				Debug.Log("Not part of a prefab for export.",scenePrefab);
+				return;
+			}
 			string rootSourcePath = AssetDatabase.GetAssetPath(sourcePrefab);
 
 			MeshRenderer[] meshes = scenePrefab.GetComponentsInChildren<MeshRenderer>(true);
