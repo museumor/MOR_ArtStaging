@@ -28,6 +28,7 @@ namespace MOR.Museum {
 		[ReadOnly] public ValidationState modelsValidationState;
 		[ReadOnly] public ValidationState textureValidationState;
 		[ReadOnly] public ValidationState materialValidationState;
+		[ReadOnly] public ValidationState audioValidationState;
 		[ReadOnly] public ValidationState lightProbeValidationState;
 
 		public bool isThroughPortal;
@@ -66,6 +67,9 @@ namespace MOR.Museum {
 
 		public Color GetMaterialValidState() {
 			return GetValidationColor(materialValidationState);
+		}
+		public Color GetAudioValidState() {
+			return GetValidationColor(audioValidationState);
 		}
 
 		public Color GetLightProbeValidState() {
@@ -448,6 +452,22 @@ namespace MOR.Museum {
 				/*if (settings.textureValidationState == ArtStagingSettings.ValidationState.CriticalFail && largeFileSize) {
 					GUI.Label(boxRect, "Files must be under 100MB. Check console.");
 				}*/
+				GUILayout.Space(10);
+				GUILayout.BeginHorizontal();
+				{
+					boxRect = GUILayoutUtility.GetRect(20, 18);
+					boxRect.x += 10;
+					boxRect.width = INDICATOR_WIDTH;
+					EditorGUI.DrawRect(boxRect, settings.GetAudioValidState());
+
+					boxRect.x += 20;
+					boxRect.width = 180;
+					if (GUI.Button(boxRect, "Check Audio")) {
+						CheckAudioSources();
+						CalculateUsedAudioSize();
+					}
+				}
+				GUILayout.EndHorizontal();
 			}
 
 			if (settings.materialValidationState == ArtStagingSettings.ValidationState.Valid || settings.materialValidationState == ArtStagingSettings.ValidationState.HasWarnings) {
@@ -609,6 +629,24 @@ namespace MOR.Museum {
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
 
+		private void CheckAudioSources() {
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			var audioSources = scenePrefab.GetComponentsInChildren<AudioSource>(true);
+			settings.audioValidationState = ArtStagingSettings.ValidationState.Valid;
+			foreach (var audioSource in audioSources) {
+				//if (audioSource.spatialize == false)
+				//{
+				//	settings.audioValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+				//	warningMessage = "Audio Sources should be Spacialized";
+				//}
+				if (audioSource.spatialBlend < 1) {
+					settings.audioValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+					warningMessage = "Audio Sources should be Spacialized";
+				}
+			}
+			//TODO: Set mixer group? Maybe setup for MOR with MOONA stuff intellegently somehow.
+		}
 		private void ApplyMORLightmap(){
 			GameObject diskPrefab = settings.rootPrefabSource;
 			GameObject scenePrefab = FindSceneInstance(diskPrefab);
@@ -617,7 +655,6 @@ namespace MOR.Museum {
 				offseter.ApplyMaterialPropertyBlockSettings();
 			}
 		}
-		
 		
 		
 		Color orange = new Color(1f,0.5f,0f);
@@ -1432,6 +1469,8 @@ namespace MOR.Museum {
 		protected (bool, bool) ValidateProject() {
 			bool hasWarnings = false;
 			bool hasErrors = false;
+			warningMessage = "";
+			errorMessage = "";
 			// Check for prefab root in scene :
 			if (settings.rootPrefabSource == null) {
 				hasErrors = true;
@@ -1447,8 +1486,9 @@ namespace MOR.Museum {
 				return (hasErrors, false);
 			}
 
-			PropertyModification[] modifications = PrefabUtility.GetPropertyModifications(rootInstance);
+			//PropertyModification[] modifications = PrefabUtility.GetPropertyModifications(rootInstance);
 			List<ObjectOverride> overrides = PrefabUtility.GetObjectOverrides(rootInstance);
+			
 			if (overrides != null && overrides.Count > 0) {
 				hasWarnings = true;
 				warningMessage = "Root has un-applied overrides";
@@ -1460,23 +1500,15 @@ namespace MOR.Museum {
 				foreach (var modification in overrides) {
 					Debug.Log($"{modification.coupledOverride} {modification.GetAssetObject()}", modification.instanceObject);
 				}
-			} else {
-				warningMessage = "";
-				//Debug.Log($"No property modification {modifications} - {overrides}");
 			}
 
-
-			//Check Mesh File sources +  Material counts
-
-			//Check Texture File Sizes
-
+			var camerasOnPrefab = rootInstance.GetComponentsInChildren<Camera>(true);
+			if (camerasOnPrefab.Length != 0)
+			{
+				errorMessage += "Remove extraneous cameras from prefab";
+				hasErrors = true;
+			}
 			// Movies ???
-
-
-			//TODO : Mor 'optional' MOR setup which users can try doing if they want, but can be left for MOR Staff
-			//Lightmaps : setup materials and bindings.
-
-			//Skybox setup
 
 			return (hasErrors, hasWarnings);
 		}
