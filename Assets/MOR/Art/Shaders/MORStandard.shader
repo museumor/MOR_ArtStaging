@@ -1,11 +1,9 @@
 // https://forum.unity3d.com/threads/standard-shader-with-stencil-mask.308433/
 // Standard Unity shader with Stencil Ref so that other shaders can mask it
-Shader "_MOR/Standard Stencil"
+Shader "_MOR/Standard (Specular Setup)"
 {
 	Properties
 	{
-	
-
 		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo", 2D) = "white" {}
 

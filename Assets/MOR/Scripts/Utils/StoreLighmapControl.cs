@@ -165,7 +165,7 @@ namespace MOR.Museum {
 				bool notLightmapped = meshRenderer.lightmapIndex < 0 || meshRenderer.scaleInLightmap == 0;
 				var c = meshRenderer.GetComponent<StoreLightmapOffset>();
 				if (notLightmapped && c == null) {
-					Debug.Log($"Skip {meshRenderer.name} - scale {meshRenderer.scaleInLightmap}");
+					//Debug.Log($"Skip {meshRenderer.name} - scale {meshRenderer.scaleInLightmap}");
 					continue;
 				}
 
@@ -179,9 +179,8 @@ namespace MOR.Museum {
 					bool swappable = Array.IndexOf(swapableShaders, mat.shader.name) >= 0;
 					if (mat == null || swappable == false) {
 						if (mat != null) {
-							Debug.Log($"{mat.shader.name}");
+							//Debug.Log($"{mat.shader.name}");
 						}
-
 						continue;
 					}
 

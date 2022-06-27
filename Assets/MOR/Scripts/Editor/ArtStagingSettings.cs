@@ -599,6 +599,7 @@ namespace MOR.Museum {
 				if (textureSize == -1) {
 					CalculateUsedTexturesSize();
 					CalculateUsedModelSize();
+					CalculateUsedAudioSize();
 				}
 
 				GUILayout.BeginHorizontal();
@@ -619,12 +620,24 @@ namespace MOR.Museum {
 				DrawBoxTextureMeter((int)texInMB,boxRect);
 				//GUILayout.EndHorizontal();
 				
-				CalculateUsedAudioSize();
+				
 				GUILayout.Label( $"\tLightmaps - {lightmapCount}");
 				GUILayout.Label($"\tLargest Texture Dimension {largestDimension}\n");
 				GUILayout.Label( $"  Approximate Model usage : {((float)modelSize / BYTES_TO_MEGABYTES2) : 0.00} MB");
 				GUILayout.Label( $"  Approximate Audio usage (compressed): {((float)audioSize / BYTES_TO_MEGABYTES) : 0.00} MB");
 				GUILayout.Label( $"                            (original): {((float)audioSizeRaw / BYTES_TO_MEGABYTES) : 0.00} MB");
+				var logoMOR = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/MOR/Editor/MOR_wide.psd");
+				if (logoMOR == null) {
+					//Debug.Log("Couldn't load logo");
+				}
+				GUIContent btnImg = new GUIContent(logoMOR);
+				var rt = GUILayoutUtility.GetRect (btnImg, GUI.skin.button, GUILayout.ExpandWidth(false),GUILayout.Height(60),GUILayout.Width(110));
+				rt.center = new Vector2(EditorGUIUtility.currentViewWidth / 2, rt.center.y);
+				bool helpPressed = GUI.Button(rt,logoMOR, GUI.skin.button);//,GUILayout.Height(60),GUILayout.Width(110));
+				if (helpPressed) {
+					string helpURL = "https://themor.notion.site/themor/MOR-Help-Centre-aaa40c5491a3433a8f3ec52ac7f25e37";
+					Application.OpenURL(helpURL);
+				}
 			}
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}

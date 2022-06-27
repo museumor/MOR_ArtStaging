@@ -1,6 +1,6 @@
 // https://forum.unity3d.com/threads/standard-shader-with-stencil-mask.308433/
 // Standard Unity shader with Stencil Ref so that other shaders can mask it
-Shader "_MOR/Standard/Standard Stencil Metalic"
+Shader "_MOR/Standard/Standard Metalic"
 {
 	Properties
 	{
