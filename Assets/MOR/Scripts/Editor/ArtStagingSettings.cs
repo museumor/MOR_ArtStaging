@@ -11,6 +11,7 @@ using UnityEngine.Playables;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 using Object = UnityEngine.Object;
 
 namespace MOR.Museum {
@@ -29,6 +30,7 @@ namespace MOR.Museum {
 		[ReadOnly] public ValidationState textureValidationState;
 		[ReadOnly] public ValidationState materialValidationState;
 		[ReadOnly] public ValidationState audioValidationState;
+		[ReadOnly] public ValidationState videoValidationState;
 		[ReadOnly] public ValidationState lightProbeValidationState;
 
 		public bool isThroughPortal;
@@ -70,6 +72,9 @@ namespace MOR.Museum {
 		}
 		public Color GetAudioValidState() {
 			return GetValidationColor(audioValidationState);
+		}		
+		public Color GetVideoValidState() {
+			return GetValidationColor(videoValidationState);
 		}
 
 		public Color GetLightProbeValidState() {
@@ -175,12 +180,13 @@ namespace MOR.Museum {
 				EditorGUI.DrawRect(boxRect, settings.GetColliderValidState());
 				boxRect.x += 12;
 			}
-
-
 			EditorGUI.DrawRect(boxRect, settings.GetTextureValidState());
 			boxRect.x += 12;
-
 			EditorGUI.DrawRect(boxRect, settings.GetMaterialValidState());
+			boxRect.x += 12;			
+			EditorGUI.DrawRect(boxRect, settings.GetAudioValidState());
+			boxRect.x += 12;			
+			EditorGUI.DrawRect(boxRect, settings.GetVideoValidState());
 			boxRect.x += 12;
 
 			EditorGUI.DrawRect(boxRect, settings.GetLightProbeValidState());
@@ -195,7 +201,9 @@ namespace MOR.Museum {
 				settings.materialValidationState = ArtStagingSettings.ValidationState.NotValidated;
 				settings.lightProbeValidationState = ArtStagingSettings.ValidationState.NotValidated;
 				settings.colliderValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.skyboxValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+				settings.skyboxValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.audioValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.videoValidationState = ArtStagingSettings.ValidationState.NotValidated;
 			}
 
 
@@ -259,6 +267,10 @@ namespace MOR.Museum {
 						settings.Save();
 					}
 				}
+				if(settings.sceneValidationState == ArtStagingSettings.ValidationState.Valid) {
+					boxRect.x += 190;
+					GUI.Label(boxRect,"All assets in prefab");
+				}
 			}
 			GUILayout.EndHorizontal();
 
@@ -277,6 +289,10 @@ namespace MOR.Museum {
 					errorMessage = "";
 					warningMessage = "";
 					DoMeshCheck();
+				}
+				if(settings.modelsValidationState == ArtStagingSettings.ValidationState.Valid) {
+					boxRect.x += 190;
+					GUI.Label(boxRect,"Mesh sizes. File formats ");
 				}
 			}
 			GUILayout.EndHorizontal();
@@ -409,7 +425,12 @@ namespace MOR.Museum {
 				}
 
 				if (settings.textureValidationState == ArtStagingSettings.ValidationState.CriticalFail && largeFileSize) {
+					boxRect.x += 190;
 					GUI.Label(boxRect, "Files must be under 100MB. Check console.");
+				}
+				if(settings.textureValidationState == ArtStagingSettings.ValidationState.Valid) {
+					boxRect.x += 190;
+					GUI.Label(boxRect,"File sizes");
 				}
 			}
 			GUILayout.EndHorizontal();
@@ -435,6 +456,10 @@ namespace MOR.Museum {
 					boxRect.width = 180;
 					if (GUI.Button(boxRect, "Check Materials")) {
 						CheckMaterials();
+					}
+					if(settings.materialValidationState == ArtStagingSettings.ValidationState.Valid) {
+						boxRect.x += 190;
+						GUI.Label(boxRect,"Materials editable");
 					}
 				}
 				GUILayout.EndHorizontal();
@@ -466,8 +491,33 @@ namespace MOR.Museum {
 						CheckAudioSources();
 						CalculateUsedAudioSize();
 					}
+					if(settings.materialValidationState == ArtStagingSettings.ValidationState.Valid) {
+						boxRect.x += 190;
+						GUI.Label(boxRect,"Audio Spatialised");
+					}
+				}
+				GUILayout.EndHorizontal();		
+				
+				GUILayout.Space(10);
+				GUILayout.BeginHorizontal();
+				{
+					boxRect = GUILayoutUtility.GetRect(20, 18);
+					boxRect.x += 10;
+					boxRect.width = INDICATOR_WIDTH;
+					EditorGUI.DrawRect(boxRect, settings.GetVideoValidState());
+
+					boxRect.x += 20;
+					boxRect.width = 180;
+					if (GUI.Button(boxRect, "Check Video")) {
+						CheckVideoSources();
+						CalculateUsedVideoSize();
+					}
 				}
 				GUILayout.EndHorizontal();
+				
+				
+				
+				
 			}
 
 			if (settings.materialValidationState == ArtStagingSettings.ValidationState.Valid || settings.materialValidationState == ArtStagingSettings.ValidationState.HasWarnings) {
@@ -487,6 +537,7 @@ namespace MOR.Museum {
 					boxRect.width = 180;
 					if (GUI.Button(boxRect, "Use Scene Reflections")) {
 						settings.lightProbeValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+						errorMessage = "";
 						settings.Save();
 					}
 
@@ -528,17 +579,26 @@ namespace MOR.Museum {
 			}
 
 			if (settings.sceneValidationState == ArtStagingSettings.ValidationState.Valid) {
+				boxRect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth, 0);
+				//GUILayout.BeginArea(new Rect(new Vector2(boxRect.position.x + 20,boxRect.position.y),new Vector2(EditorGUIUtility.currentViewWidth-40,120)));
+				boxRect.height = 160;
+				EditorGUI.DrawRect(boxRect,new Color(0,0,0,0.3f));
+				boxRect.position = new Vector2(boxRect.position.x,boxRect.position.y-160);
 				//Setup an area for setting up localized lightmap settings, analogous to StoreLighmapControl(sic)
-				GUILayout.Space(20);
-				boxRect = GUILayoutUtility.GetRect(20, 8);
-				boxRect.height = 1;
-				EditorGUI.DrawRect(boxRect, Color.black);
+				//GUILayout.Space(20);
+				//boxRect = GUILayoutUtility.GetRect(20, 8);
+				//boxRect.height = 1;
+				//EditorGUI.DrawRect(boxRect, Color.black);
 
-				GUILayout.Space(8);
+				//GUILayout.Space(8);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 20;
 				boxRect.width = 270;
-				GUI.Label(boxRect, "Localize Lightmaps");
+
+
+				GUIStyle boldStyle = GUI.skin.label;
+				boldStyle.fontStyle = FontStyle.Bold;
+				GUI.Label(boxRect, "Localize Lightmaps",boldStyle);
 
 				GUILayout.Space(20);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
@@ -570,11 +630,15 @@ namespace MOR.Museum {
 					}
 				}
 				GUILayout.EndHorizontal();
-
-				GUILayout.Space(12);
-				boxRect = GUILayoutUtility.GetRect(20, 18);
-				boxRect.x += 40;
-				boxRect.width = 270;
+				
+				
+				GUILayout.Space(20);
+				boxRect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth- 200, 30);
+				var center = boxRect.center;
+				boxRect.width = EditorGUIUtility.currentViewWidth - 200;
+				center.x = EditorGUIUtility.currentViewWidth/2;
+				boxRect.center = center;
+				
 				if (GUI.Button(boxRect, "Make MOR Placeable Prefab Variant")) {
 					MakeMORPlaceablePrefabVariant();
 				}
@@ -582,7 +646,7 @@ namespace MOR.Museum {
 				EditorGUILayout.HelpBox("This will make a variant prefab which will have dynamic shadowcasting disabled as an override, as that is in the lightmap " +
 				                        "and will handle disabling lights etc.", MessageType.None);
 				
-				
+				GUILayout.Space(20);
 				/*boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 40;
 				boxRect.width = 270;
@@ -600,6 +664,7 @@ namespace MOR.Museum {
 					CalculateUsedTexturesSize();
 					CalculateUsedModelSize();
 					CalculateUsedAudioSize();
+					CalculateUsedVideoSize();
 				}
 
 				GUILayout.BeginHorizontal();
@@ -624,16 +689,24 @@ namespace MOR.Museum {
 				GUILayout.Label( $"\tLightmaps - {lightmapCount}");
 				GUILayout.Label($"\tLargest Texture Dimension {largestDimension}\n");
 				GUILayout.Label( $"  Approximate Model usage : {((float)modelSize / BYTES_TO_MEGABYTES2) : 0.00} MB");
-				GUILayout.Label( $"  Approximate Audio usage (compressed): {((float)audioSize / BYTES_TO_MEGABYTES) : 0.00} MB");
-				GUILayout.Label( $"                            (original): {((float)audioSizeRaw / BYTES_TO_MEGABYTES) : 0.00} MB");
+				if (audioSize > 0) {
+					GUILayout.Label($"  Approximate Audio usage (compressed): {((float)audioSize / BYTES_TO_MEGABYTES): 0.00} MB");
+					GUILayout.Label($"                            (original): {((float)audioSizeRaw / BYTES_TO_MEGABYTES): 0.00} MB");
+				}
+
+				if (videoSize > 0) {
+					GUILayout.Label($"  Approximate Video usage (compressed): {((float)videoSize / BYTES_TO_MEGABYTES): 0.00} MB");
+					GUILayout.Label($"                            (original): {((float)videoSizeRaw / BYTES_TO_MEGABYTES): 0.00} MB");
+				}
+
 				var logoMOR = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/MOR/Editor/MOR_wide.psd");
 				if (logoMOR == null) {
 					//Debug.Log("Couldn't load logo");
 				}
 				GUIContent btnImg = new GUIContent(logoMOR);
-				var rt = GUILayoutUtility.GetRect (btnImg, GUI.skin.button, GUILayout.ExpandWidth(false),GUILayout.Height(60),GUILayout.Width(110));
+				var rt = GUILayoutUtility.GetRect (btnImg, GUIStyle.none, GUILayout.ExpandWidth(false),GUILayout.Height(60),GUILayout.Width(110));
 				rt.center = new Vector2(EditorGUIUtility.currentViewWidth / 2, rt.center.y);
-				bool helpPressed = GUI.Button(rt,logoMOR, GUI.skin.button);//,GUILayout.Height(60),GUILayout.Width(110));
+				bool helpPressed = GUI.Button(rt,logoMOR, GUIStyle.none);//,GUILayout.Height(60),GUILayout.Width(110));
 				if (helpPressed) {
 					string helpURL = "https://themor.notion.site/themor/MOR-Help-Centre-aaa40c5491a3433a8f3ec52ac7f25e37";
 					Application.OpenURL(helpURL);
@@ -659,7 +732,18 @@ namespace MOR.Museum {
 				}
 			}
 			//TODO: Set mixer group? Maybe setup for MOR with MOONA stuff intellegently somehow.
+		}	
+		private void CheckVideoSources() {
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			var videoPlayers = scenePrefab.GetComponentsInChildren<VideoPlayer>(true);
+			settings.videoValidationState = ArtStagingSettings.ValidationState.Valid;
+			foreach (var player in videoPlayers) {
+
+			}
 		}
+		
+		
 		private void ApplyMORLightmap(){
 			GameObject diskPrefab = settings.rootPrefabSource;
 			GameObject scenePrefab = FindSceneInstance(diskPrefab);
@@ -819,7 +903,7 @@ namespace MOR.Museum {
 			//Debug.Log($"Total Model Size: {(fileSize/(1048576f)) : 0.00}MB");
 		}
 
-
+		
 		public void CalculateUsedAudioSize(){
 			GameObject diskPrefab = settings.rootPrefabSource;
 			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(diskPrefab));
@@ -849,8 +933,26 @@ namespace MOR.Museum {
 			audioSize = fileSize;
 			audioSizeRaw = fileSizeR;
 			//Debug.Log($"Total Audio Size: {(fileSize/(1048576f)) : 0.00}MB");
+		}		
+		public void CalculateUsedVideoSize(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(diskPrefab));
+			ulong fileSize = 0;
+			ulong fileSizeR = 0;
+			foreach (var dependency in dependencies) {
+				if (AssetDatabase.GetMainAssetTypeAtPath(dependency) == typeof(VideoClip))
+				{
+					VideoClipImporter importer = (VideoClipImporter)VideoClipImporter.GetAtPath(dependency);
+					fileSizeR += importer.sourceFileSize;
+					fileSize += importer.outputFileSize;
+				}
+			}
+			videoSize = fileSize;
+			videoSizeRaw = fileSizeR;
+			//Debug.Log($"Total Audio Size: {(fileSize/(1048576f)) : 0.00}MB");
 		}
-
+		private ulong videoSize = 0;
+		private ulong videoSizeRaw = 0;
 		private int audioSize = 0;
 		private int audioSizeRaw = 0;
 		public void MakeMORPlaceablePrefabVariant(){
@@ -1287,6 +1389,9 @@ namespace MOR.Museum {
 		private void CheckMaterials() {
 			GameObject sourcePrefab = settings.rootPrefabSource;
 			MeshRenderer[] renderers = sourcePrefab.GetComponentsInChildren<MeshRenderer>(true);
+			settings.materialValidationState = ArtStagingSettings.ValidationState.Valid;
+			errorMessage = "";
+			warningMessage = "";
 			foreach (MeshRenderer meshRenderer in renderers) {
 				/*ReceiveGI giFlag = meshRenderer.receiveGI;
 				if (giFlag != ReceiveGI.Lightmaps) {
@@ -1297,6 +1402,11 @@ namespace MOR.Museum {
 				Material[] materials = meshRenderer.sharedMaterials;
 				foreach (Material material in materials) {
 					string modelPath = AssetDatabase.GetAssetPath(material);
+					if (material.name == "Default-Material" && modelPath.EndsWith("unity_builtin_extra")) {
+						//Debug.Log($"DefaultMaterial modelpath - {modelPath}");
+						settings.materialValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+						errorMessage += $"Unity Default Material  object - {meshRenderer.name}\n";
+					}
 					//If source is in an FBX we need to extract it
 					if (modelPath.EndsWith(".fbx") == false) {
 						continue;
@@ -1308,14 +1418,11 @@ namespace MOR.Museum {
 					}
 
 					settings.materialValidationState = ArtStagingSettings.ValidationState.CriticalFail;
-					settings.Save();
-					Debug.LogError($"Lightmapped Materials must be extracted from model. {material.name}", material);
-
-					return;
+					errorMessage += ($"Lightmapped Materials must be extracted from model. {material.name} - object - {meshRenderer.name}\n");
 				}
 			}
 
-			settings.materialValidationState = ArtStagingSettings.ValidationState.Valid;
+			
 			settings.Save();
 		}
 
@@ -1329,11 +1436,14 @@ namespace MOR.Museum {
 			List<string> assetPaths = new List<string>();
 			AssetDatabase.StartAssetEditing();
 			try {
+				bool changesOnDisk = false;
 				foreach (MeshRenderer mesh in meshes) {
 					Material meshMaterial = mesh.sharedMaterial;
 					string modelPath = AssetDatabase.GetAssetPath(meshMaterial);
+					bool isUnityDefaultMaterial = meshMaterial.name == "Default-Material" && modelPath.EndsWith("unity_builtin_extra");
+					
 					//If source is in an FBX we need to extract it
-					if (modelPath.EndsWith(".fbx") == false) {
+					if (!isUnityDefaultMaterial && modelPath.EndsWith(".fbx") == false) {
 						continue;
 					}
 
@@ -1342,10 +1452,18 @@ namespace MOR.Museum {
 					if (matIndex >= 0) {
 						mesh.sharedMaterial = newMaterials[matIndex];
 						continue;
+						
 					}
 
 					string sourceFilename = meshMaterial.name;
-					string outPath = Path.Combine(Path.GetDirectoryName(modelPath) ?? string.Empty, $"{sourceFilename}.mat");
+					var meshFilter = mesh.GetComponent<MeshFilter>();
+					var sharedMesh = meshFilter.sharedMesh;
+					var sourceMesh = PrefabUtility.GetCorrespondingObjectFromOriginalSource(sharedMesh);
+					string meshPartFilepath = AssetDatabase.GetAssetPath(sharedMesh);
+					if (string.IsNullOrEmpty(meshPartFilepath)) {
+						Debug.LogError($"Path to model is null : {mesh.name} - mesh - {mesh.GetComponent<MeshFilter>().sharedMesh} ");
+					}
+					string outPath = Path.Combine(Path.GetDirectoryName(meshPartFilepath) ?? string.Empty, $"{sourceFilename}.mat");
 					//If material exists on disk in same location, use that asset instead of creating a new one
 					if (File.Exists(outPath) == false) {
 						var newMat = Instantiate(meshMaterial);
@@ -1361,12 +1479,30 @@ namespace MOR.Museum {
 					Debug.Log(outPath, mesh.gameObject);
 
 					// ReSharper disable once AccessToStaticMemberViaDerivedType
-					ModelImporter importer = (ModelImporter)ModelImporter.GetAtPath(modelPath);
-					importer.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
-					importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
+					
+					ModelImporter importer = (ModelImporter)ModelImporter.GetAtPath(meshPartFilepath);
+					if (importer.materialImportMode == ModelImporterMaterialImportMode.None) {
+						//If set to none, we need to go through and swap the materials.
+						SerializedObject obj = new SerializedObject(mesh);
+						var propArr = obj.FindProperty("m_Materials");
+						var prop = propArr.GetArrayElementAtIndex(0);
+						prop.objectReferenceValue = diskMaterial;
+						var changed = obj.ApplyModifiedProperties();
+						if (changed) {
+							changesOnDisk = true;
+						}
+					}
+					else {
+						importer.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+						importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
+					}
+
 				}
 
 				AssetDatabase.StopAssetEditing();
+				if (changesOnDisk) {
+					PrefabUtility.SavePrefabAsset(sourcePrefab);
+				}
 			}
 			catch (Exception e) {
 				Debug.LogError(e);

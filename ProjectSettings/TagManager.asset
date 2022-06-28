@@ -18,6 +18,8 @@ TagManager:
   - Antenna3
   - Ghost
   - Grabbable
+  - rec
+  - LocalSkybox
   layers:
   - Default
   - TransparentFX
