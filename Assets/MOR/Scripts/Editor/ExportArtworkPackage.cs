@@ -11,7 +11,7 @@ namespace MOR.Museum {
 			Validator.CheckVertexCount(g);
 		}
 
-		[MenuItem("MOR/Export Package %#e")]
+		[MenuItem("Tools/MOR/Export Package %#e")]
 		public static void ExportPackage(){
 
 			//ResourceValidation.

@@ -40,6 +40,7 @@ namespace MOR.Museum {
 		[ReadOnly] public ValidationState colliderValidationState;
 		public ValidationState skyboxValidationState;
 		public bool inEditorMORLightmapApply = false; 
+		[HideInInspector] public uint  checksum = 0;
 		public void Save() {
 			EditorUtility.SetDirty(this);
 			AssetDatabase.SaveAssetIfDirty(this);
@@ -126,13 +127,13 @@ namespace MOR.Museum {
 		private string warningMessage = "";
 		private string errorMessage = "";
 
-		[MenuItem("Tools/MOR ArtStaging")]
+		[MenuItem("Tools/MOR/ArtStaging")]
 		public static void Init() {
 			if (Application.isPlaying) {
 				return;
 			}
 			ArtStagingEditor window = GetWindow<ArtStagingEditor>("MOR Art Staging", true);
-			window.minSize = window.minSize + new Vector2(0, 30); //MAke taller by default?
+			window.minSize =  new Vector2(window.minSize.x, 410); //MAke taller by default?
 			window.Show();
 			ArtStagingSettings artStagingSettings = AssetDatabase.LoadAssetAtPath<ArtStagingSettings>("Assets/MOR/ArtStagingSettings.asset");
 
@@ -512,6 +513,13 @@ namespace MOR.Museum {
 						CheckVideoSources();
 						CalculateUsedVideoSize();
 					}
+
+					if (settings.videoValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
+						bool doAdd = GUILayout.Button("Add Video Script");
+						if (doAdd) {
+							AddFlatVideoPlayerScripts();
+						}
+					}
 				}
 				GUILayout.EndHorizontal();
 				
@@ -633,16 +641,8 @@ namespace MOR.Museum {
 				
 				
 				GUILayout.Space(20);
-				boxRect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth- 200, 30);
-				var center = boxRect.center;
-				boxRect.width = EditorGUIUtility.currentViewWidth - 200;
-				center.x = EditorGUIUtility.currentViewWidth/2;
-				boxRect.center = center;
-				
-				if (GUI.Button(boxRect, "Make MOR Placeable Prefab Variant")) {
-					MakeMORPlaceablePrefabVariant();
-				}
 
+				
 				EditorGUILayout.HelpBox("This will make a variant prefab which will have dynamic shadowcasting disabled as an override, as that is in the lightmap " +
 				                        "and will handle disabling lights etc.", MessageType.None);
 				
@@ -698,7 +698,7 @@ namespace MOR.Museum {
 					GUILayout.Label($"  Approximate Video usage (compressed): {((float)videoSize / BYTES_TO_MEGABYTES): 0.00} MB");
 					GUILayout.Label($"                            (original): {((float)videoSizeRaw / BYTES_TO_MEGABYTES): 0.00} MB");
 				}
-
+				GUILayout.Space(20);
 				var logoMOR = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/MOR/Editor/MOR_wide.psd");
 				if (logoMOR == null) {
 					//Debug.Log("Couldn't load logo");
@@ -711,8 +711,107 @@ namespace MOR.Museum {
 					string helpURL = "https://themor.notion.site/themor/MOR-Help-Centre-aaa40c5491a3433a8f3ec52ac7f25e37";
 					Application.OpenURL(helpURL);
 				}
+
+				boxRect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth- 200, 30);
+				var center = boxRect.center;
+				boxRect.width = EditorGUIUtility.currentViewWidth - 200;
+				center.x = EditorGUIUtility.currentViewWidth/2;
+				boxRect.center = center;
+				if (GUI.Button(boxRect, settings.MORPlaceablePrefab == null ? "Make MOR Placeable Prefab Variant" : "Update MOR Placeable Prefab Variant")) {
+					MakeMORPlaceablePrefabVariant();
+				}
+
+				if (GUILayout.Button("Export Bundle")) {
+					ExportBundle();
+				}
+				
 			}
 			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
+		}
+
+		private void ExportBundle(bool buildPackage = false){
+			//ResourceValidation.
+			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(settings.MORPlaceablePrefab));
+			List<string> assetsToExport = new List<string>(dependencies.Length);
+			List<Object> assetsObjectsToExport = new List<Object>(dependencies.Length);
+			foreach (string dependency in dependencies) {
+				if (buildPackage == false && dependency.EndsWith(".cs")) {
+					Debug.Log($"Exclude script ? {dependency} ");
+					continue;
+				}
+				else {
+					if (dependency.StartsWith("Assets/MOR")) {
+						Debug.Log($"Exclude MOR asset dependency : {dependency}");
+						continue;
+					}
+
+					if (dependency.StartsWith("Assets/YOUR_ASSETS_HERE") == false) {
+						Debug.LogWarning($"Dependency not in YOUR_ASSETS_HERE  : {dependency}");
+						continue;
+					}
+				}
+
+				assetsToExport.Add(dependency);
+				assetsObjectsToExport.Add(AssetDatabase.LoadAssetAtPath<Object>(dependency));
+			}
+
+			if (assetsToExport.Count == 0) {
+				Debug.LogError("No Assets to export");
+				return;
+			}
+			ExportPackageOptions exportPackageOptions = ExportPackageOptions.Default;
+			DateTime thisDay = DateTime.Today;
+			string prefix = "MORStagedArtwork";
+			string datestamp = $"{thisDay.Year}-{thisDay.Month}-{thisDay.Day}";
+			
+
+			
+			
+			if (buildPackage) {
+				string exportFilenamePackage = $"{prefix}_{Environment.UserName}_{datestamp}.unitypackage"; //TODO : set up somewhere to set this... prefab name? folder name? hmm....
+				string projectPath = Directory.GetCurrentDirectory();
+				exportFilenamePackage = Path.Combine(projectPath, exportFilenamePackage);
+				AssetBundleBuild bundle = new AssetBundleBuild();
+				AssetDatabase.ExportPackage(assetsToExport.ToArray(), exportFilenamePackage, exportPackageOptions);
+				EditorUtility.RevealInFinder(exportFilenamePackage);
+			}
+			else {
+				var assetPath = AssetDatabase.GetAssetPath(settings.MORPlaceablePrefab);
+				var prefabImporter = AssetImporter.GetAtPath(assetPath);
+				prefabImporter.assetBundleName = settings.rootPrefabSource.name;
+				prefabImporter.SetAssetBundleNameAndVariant(settings.rootPrefabSource.name,"");
+				
+				string exportFilenameBundle = $"{settings.MORPlaceablePrefab.name}.bundle"; //TODO : set up somewhere to set this... prefab name? folder name? hmm....
+
+				string projectPath = Directory.GetCurrentDirectory();
+				exportFilenameBundle = Path.Combine(projectPath, exportFilenameBundle);
+				//AssetBundleBuild bundle = new AssetBundleBuild();
+				/*
+				BuildPipeline.BuildAssetBundle(settings.MORPlaceablePrefab, assetsObjectsToExport.ToArray(), exportFilenameBundle
+					,out settings.checksum
+					,BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle | BuildAssetBundleOptions.CollectDependencies
+					,BuildTarget.StandaloneWindows64
+					);
+				*/
+				//BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+				//buildPlayerOptions.assetBundleManifestPath
+				string exportFilenameBundlePath = $"{settings.MORPlaceablePrefab.name}"; //TODO : set up somewhere to set this... prefab name? folder name? hmm....
+				exportFilenameBundlePath = Path.Combine(projectPath, exportFilenameBundlePath);
+				var pathExists = Directory.Exists(exportFilenameBundle);
+				if (pathExists == false) {
+					Directory.CreateDirectory(exportFilenameBundlePath);
+				}
+				AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
+				buildMap[0].assetNames = assetsToExport.ToArray();
+				buildMap[0].assetBundleName = settings.rootPrefabSource.name;
+				
+				var manifest = BuildPipeline.BuildAssetBundles(exportFilenameBundlePath
+					,buildMap
+					,BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle | BuildAssetBundleOptions.CollectDependencies
+					, BuildTarget.StandaloneWindows64);
+				
+				EditorUtility.RevealInFinder(exportFilenameBundle);
+			}
 		}
 
 		private void CheckAudioSources() {
@@ -738,11 +837,59 @@ namespace MOR.Museum {
 			GameObject scenePrefab = FindSceneInstance(diskPrefab);
 			var videoPlayers = scenePrefab.GetComponentsInChildren<VideoPlayer>(true);
 			settings.videoValidationState = ArtStagingSettings.ValidationState.Valid;
+			errorMessage = "";
+			bool needsScriptAdd = false;
 			foreach (var player in videoPlayers) {
-
+				var morPlayer = player.GetComponent<FlatVideoPlayer>();
+				if (morPlayer == null) {
+					settings.videoValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+					errorMessage += "Video Players need the MOR script : FlatVideoPlayer added\n";
+					needsScriptAdd = true;
+				}
+				if (player.audioOutputMode != VideoAudioOutputMode.AudioSource && player.audioOutputMode != VideoAudioOutputMode.None) {
+					settings.videoValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+					errorMessage += $"Video Audio output should be set to 'Audio Source' or 'None' - {player.name} \n";
+				}
+				if (player.renderMode != VideoRenderMode.MaterialOverride) {
+					settings.videoValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+					errorMessage += $"Set players to 'Material Override' and assign renderer target {player.name}\n";
+				}
+				
 			}
 		}
-		
+
+		private void AddFlatVideoPlayerScripts(){
+			GameObject diskPrefab = settings.rootPrefabSource;
+			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			var videoPlayers = scenePrefab.GetComponentsInChildren<VideoPlayer>(true);
+			settings.videoValidationState = ArtStagingSettings.ValidationState.Valid;
+			errorMessage = "";
+				bool needsScriptAdd = false;
+			foreach (VideoPlayer playerScene in videoPlayers) {
+				VideoPlayer player = PrefabUtility.GetCorrespondingObjectFromOriginalSource<VideoPlayer>(playerScene);
+				if (playerScene.GetComponent<FlatVideoPlayer>() != null) {
+					continue;
+				}
+				var flatPlayer = player.gameObject.AddComponent<FlatVideoPlayer>();
+				
+				if (player.source == VideoSource.Url) {
+					flatPlayer.videoPathOrUrl = player.url;
+				}
+				else {
+					//TODO : How do we deal with direct file reference? Manually export to 'streaming Assets?"
+				}
+				
+				if(player.audioTrackCount > 0) {
+					flatPlayer.audioSource = player.GetTargetAudioSource(0);
+				}
+
+				if (player.renderMode == VideoRenderMode.MaterialOverride) {
+					flatPlayer.screen = player.targetMaterialRenderer?.transform;
+				}
+				player.playOnAwake = false;
+				player.enabled = false;
+			}
+		}
 		
 		private void ApplyMORLightmap(){
 			GameObject diskPrefab = settings.rootPrefabSource;
@@ -865,8 +1012,10 @@ namespace MOR.Museum {
 			}
 			
 			textureSize = fileSize;
+			string textureSizeInfo = "Used Texture Info : ";
+			string largestTextures = "";
 			foreach (var key in texturesBySize.Keys) {
-				Debug.Log($"Textures {key} - {texturesBySize[key]}");
+				textureSizeInfo += ($"Textures {key} - {texturesBySize[key]}\n");
 				if (key != largestDimension) {
 					continue;
 				}
@@ -876,12 +1025,14 @@ namespace MOR.Museum {
 							var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(dependency);
 							var matchKey = new Vector2(tex.width, tex.height);
 							if (matchKey == key) {
-								Debug.Log($"	tex - {dependency}", tex);
+								largestTextures += ($"	tex - {dependency}\n");
 							}
 						}
 					}
 				}
 			}
+			Debug.Log(textureSizeInfo);
+			Debug.Log(largestTextures);
 			//Debug.Log($"Total Texture Size: {(fileSize/(2*1048576f)) : 0.00}MB");
 		}
 		
@@ -957,13 +1108,21 @@ namespace MOR.Museum {
 		private int audioSizeRaw = 0;
 		public void MakeMORPlaceablePrefabVariant(){
 			GameObject diskPrefab = settings.rootPrefabSource;
-			//GameObject scenePrefab = FindSceneInstance(diskPrefab);
-			GameObject prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(diskPrefab);
-			string prefabPath = AssetDatabase.GetAssetPath(diskPrefab);
-			string newPath = Path.Combine(Path.GetDirectoryName(prefabPath), Path.GetFileNameWithoutExtension(prefabPath) + "_MORArtwork.prefab");
+			if (settings.MORPlaceablePrefab == null) {
+				GameObject prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(diskPrefab);
+                string prefabPath = AssetDatabase.GetAssetPath(diskPrefab);
+                string newPath = Path.Combine(Path.GetDirectoryName(prefabPath), Path.GetFileNameWithoutExtension(prefabPath) + "_MORArtwork.prefab");
+   				var newPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(prefabInstance, newPath,InteractionMode.AutomatedAction);
+   				settings.MORPlaceablePrefab = newPrefab;
+                settings.Save();
+   				DestroyImmediate(prefabInstance);             
+			}
 			
+			//GameObject scenePrefab = FindSceneInstance(diskPrefab);
+
+			GameObject diskVariant = settings.MORPlaceablePrefab;
 			//Turn off shadowcasting on objects, as this should be handled by the lightmap renderer.
-			MeshRenderer[] allRenderers = prefabInstance.GetComponentsInChildren<MeshRenderer>(true);
+			MeshRenderer[] allRenderers = diskVariant.GetComponentsInChildren<MeshRenderer>(true);
 			foreach (MeshRenderer meshRenderer in allRenderers)
 			{
 				SerializedObject serialized = new SerializedObject(meshRenderer);
@@ -972,17 +1131,17 @@ namespace MOR.Museum {
 				serialized.ApplyModifiedProperties();
 			}
 			//Add override to disable all lights
-			Light[] lights = prefabInstance.GetComponentsInChildren<Light>(true);
+			Light[] lights = diskVariant.GetComponentsInChildren<Light>(true);
 			foreach (Light light in lights) {
 				SerializedObject serializedObject = new SerializedObject(light);
 				var prop = serializedObject.FindProperty("m_Enabled");
 				prop.boolValue = false;
 				serializedObject.ApplyModifiedProperties();
 			}
+
+			PrefabUtility.SavePrefabAsset(diskVariant);
 			//EditorUtility.SetDirty();
-			var newPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(prefabInstance, newPath,InteractionMode.AutomatedAction);
-			settings.MORPlaceablePrefab = newPrefab;
-			DestroyImmediate(prefabInstance);
+
 		}
 		
 		
