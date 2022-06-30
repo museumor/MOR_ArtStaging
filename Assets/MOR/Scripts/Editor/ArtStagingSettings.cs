@@ -32,15 +32,17 @@ namespace MOR.Museum {
 		[ReadOnly] public ValidationState audioValidationState;
 		[ReadOnly] public ValidationState videoValidationState;
 		[ReadOnly] public ValidationState lightProbeValidationState;
+		[ReadOnly] public ValidationState scriptValidationState;
 
 		public bool isThroughPortal;
 		public GameObject rootPrefabSource;
 		public GameObject MORPlaceablePrefab;
 		[ReadOnly] public bool playableDirectorOK = true;
 		[ReadOnly] public ValidationState colliderValidationState;
-		public ValidationState skyboxValidationState;
+		[ReadOnly] public ValidationState skyboxValidationState;
 		public bool inEditorMORLightmapApply = false; 
-		[HideInInspector] public uint  checksum = 0;
+		[ReadOnly] public uint  checksum = 0;
+		public bool scriptChecksDismissed = false;
 		public void Save() {
 			EditorUtility.SetDirty(this);
 			AssetDatabase.SaveAssetIfDirty(this);
@@ -55,6 +57,22 @@ namespace MOR.Museum {
 			}
 		}
 
+		public void ClearSettings(){
+			sceneValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			modelsValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			textureValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			materialValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			lightProbeValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			colliderValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			skyboxValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			audioValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			videoValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			scriptValidationState = ArtStagingSettings.ValidationState.NotValidated;
+			scriptChecksDismissed = false;
+			MORPlaceablePrefab = null;
+			
+			Save();
+		}
 
 		public Color GetSceneValidState() {
 			return GetValidationColor(sceneValidationState);
@@ -88,6 +106,9 @@ namespace MOR.Museum {
 
 		public Color GetSkyboxValidState() {
 			return GetValidationColor(skyboxValidationState);
+		}
+		public Color GetScriptValidState() {
+			return GetValidationColor(scriptValidationState);
 		}
 
 
@@ -169,12 +190,12 @@ namespace MOR.Museum {
 			GUI.enabled = true;
 			GUILayout.Space(10);
 			Rect boxRect = GUILayoutUtility.GetRect(20, 18);
-			//Draw top boxes for all checks
+			
+			//# STATUS BOXES
 			boxRect.x += 10;
 			boxRect.width = INDICATOR_WIDTH;
 			EditorGUI.DrawRect(boxRect, settings.GetSceneValidState());
 			boxRect.x += 12;
-
 			EditorGUI.DrawRect(boxRect, settings.GetModelValidState());
 			boxRect.x += 12;
 			if (settings.isThroughPortal) {
@@ -189,26 +210,17 @@ namespace MOR.Museum {
 			boxRect.x += 12;			
 			EditorGUI.DrawRect(boxRect, settings.GetVideoValidState());
 			boxRect.x += 12;
-
+			EditorGUI.DrawRect(boxRect, settings.GetScriptValidState());			
+			boxRect.x += 12;
 			EditorGUI.DrawRect(boxRect, settings.GetLightProbeValidState());
+
 			
 			boxRect.x = 320;
 			boxRect.height = 20;
 			boxRect.width = 170;
 			if (GUI.Button(boxRect, "Reset Checks")) {
-				settings.sceneValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.modelsValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.textureValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.materialValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.lightProbeValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.colliderValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.skyboxValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.audioValidationState = ArtStagingSettings.ValidationState.NotValidated;
-				settings.videoValidationState = ArtStagingSettings.ValidationState.NotValidated;
+				settings.ClearSettings();
 			}
-
-
-
 
 
 			GUILayout.Space(10);
@@ -253,7 +265,6 @@ namespace MOR.Museum {
 					settings.sceneValidationState =
 						hasErrors ? ArtStagingSettings.ValidationState.CriticalFail : (hasWarnings ? ArtStagingSettings.ValidationState.HasWarnings : ArtStagingSettings.ValidationState.Valid);
 					settings.playableDirectorOK = this.CheckPlayableDirector();
-
 					settings.Save();
 				}
 
@@ -269,13 +280,13 @@ namespace MOR.Museum {
 					}
 				}
 				if(settings.sceneValidationState == ArtStagingSettings.ValidationState.Valid) {
-					boxRect.x += 190;
+					boxRect.x += 170;
 					GUI.Label(boxRect,"All assets in prefab");
 				}
 			}
 			GUILayout.EndHorizontal();
 
-			//MeshCheck
+			//# MESH CHECK
 			GUILayout.Space(10);
 			GUILayout.BeginHorizontal();
 			{
@@ -335,6 +346,7 @@ namespace MOR.Museum {
 
 			if (settings.colliderValidationState != ArtStagingSettings.ValidationState.Valid && (settings.modelsValidationState == ArtStagingSettings.ValidationState.Valid ||
 			                                                                                     settings.modelsValidationState == ArtStagingSettings.ValidationState.HasWarnings)) {
+				//# COLLISION CHECK
 				GUILayout.Space(10);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 50;
@@ -354,6 +366,7 @@ namespace MOR.Museum {
 			}
 
 			if (settings.colliderValidationState == ArtStagingSettings.ValidationState.Valid && settings.skyboxValidationState != ArtStagingSettings.ValidationState.Valid) {
+				//# SKYBOX CHECK
 				GUILayout.Space(10);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				boxRect.x += 50;
@@ -409,7 +422,7 @@ namespace MOR.Museum {
 
 
 
-			//Texture Check.
+			//# TEXTURE CHECK
 			GUILayout.Space(10);
 			GUILayout.BeginHorizontal();
 			{
@@ -444,7 +457,7 @@ namespace MOR.Museum {
 			    settings.sceneValidationState != ArtStagingSettings.ValidationState.NotValidated &&
 			    settings.sceneValidationState != ArtStagingSettings.ValidationState.CriticalFail
 			   ) {
-				//Material Check
+				//# MATERIALS CHECK
 				GUILayout.Space(10);
 				GUILayout.BeginHorizontal();
 				{
@@ -464,7 +477,7 @@ namespace MOR.Museum {
 					}
 				}
 				GUILayout.EndHorizontal();
-
+			
 				if (settings.materialValidationState == ArtStagingSettings.ValidationState.CriticalFail) {
 					GUILayout.Space(10);
 					boxRect = GUILayoutUtility.GetRect(20, 18);
@@ -475,9 +488,8 @@ namespace MOR.Museum {
 						CheckMaterials();
 					}
 				}
-				/*if (settings.textureValidationState == ArtStagingSettings.ValidationState.CriticalFail && largeFileSize) {
-					GUI.Label(boxRect, "Files must be under 100MB. Check console.");
-				}*/
+				
+				//# AUDIO CHECK
 				GUILayout.Space(10);
 				GUILayout.BeginHorizontal();
 				{
@@ -498,7 +510,7 @@ namespace MOR.Museum {
 					}
 				}
 				GUILayout.EndHorizontal();		
-				
+				//# VIDEO CHECK
 				GUILayout.Space(10);
 				GUILayout.BeginHorizontal();
 				{
@@ -522,14 +534,44 @@ namespace MOR.Museum {
 					}
 				}
 				GUILayout.EndHorizontal();
-				
-				
-				
-				
+				//# SCRIPT CHECK
+				GUILayout.Space(10);
+				GUILayout.BeginHorizontal();
+				{
+					boxRect = GUILayoutUtility.GetRect(20, 18);
+					boxRect.x += 10;
+					boxRect.width = INDICATOR_WIDTH;
+					EditorGUI.DrawRect(boxRect, settings.GetScriptValidState());
+
+					boxRect.x += 20;
+					boxRect.width = 180;
+					
+					if (GUI.Button(boxRect, "Check Scripts")) {
+						errorMessage = "";
+						warningMessage = "";
+						settings.scriptValidationState = ArtStagingSettings.ValidationState.Valid;
+						CheckScripts();
+						settings.Save();
+					}
+
+					if (settings.scriptValidationState == ArtStagingSettings.ValidationState.CriticalFail || settings.scriptValidationState == ArtStagingSettings.ValidationState.HasWarnings) {
+						bool initialState = settings.scriptChecksDismissed;
+						boxRect.x += 190;
+						boxRect.width = 270;
+						settings.scriptChecksDismissed = GUI.Toggle(boxRect,settings.scriptChecksDismissed, "For Package OR  scrips ok to be missing");
+						if(settings.scriptChecksDismissed != initialState) {
+							settings.scriptValidationState = settings.scriptChecksDismissed ? ArtStagingSettings.ValidationState.HasWarnings : ArtStagingSettings.ValidationState.CriticalFail;
+							if (settings.scriptChecksDismissed) {
+								errorMessage = "";
+							}
+						}
+					}
+				}
+				GUILayout.EndHorizontal();
 			}
 
 			if (settings.materialValidationState == ArtStagingSettings.ValidationState.Valid || settings.materialValidationState == ArtStagingSettings.ValidationState.HasWarnings) {
-				//LightProbe Check.
+				//# LIGHTPROBE Check.
 				GUILayout.Space(5);
 				boxRect = GUILayoutUtility.GetRect(20, 18);
 				GUI.Label(boxRect, "Reflection Probes");
@@ -575,6 +617,7 @@ namespace MOR.Museum {
 					
 				}
 			}
+
 
 			GUILayout.Space(20);
 			//Warning and Error boxes
@@ -647,19 +690,8 @@ namespace MOR.Museum {
 				                        "and will handle disabling lights etc.", MessageType.None);
 				
 				GUILayout.Space(20);
-				/*boxRect = GUILayoutUtility.GetRect(20, 18);
-				boxRect.x += 40;
-				boxRect.width = 270;
-				if (GUI.Button(boxRect, "CalculateUsedTexturesSize")) {
-					
-				}
-				boxRect = GUILayoutUtility.GetRect(20, 18);
-				boxRect.x += 40;
-				boxRect.width = 270;
-				if (GUI.Button(boxRect, "CalculateUsedModelSize")) {
-					
-				}
-				*/
+				
+				//Calculate sizes for display on initial load
 				if (textureSize == -1) {
 					CalculateUsedTexturesSize();
 					CalculateUsedModelSize();
@@ -678,12 +710,12 @@ namespace MOR.Museum {
 				GUI.Label( boxRect,$"  Approximate Texture usage : {texInMB : 0.00} MB in {textureCount} textures");
 				GUILayout.EndHorizontal();		
 				
-				//GUILayout.BeginHorizontal();
+				
 				boxRect = GUILayoutUtility.GetRect(INDICATOR_WIDTH, 9);
 				boxRect.x += 30;
 				boxRect.width = INDICATOR_WIDTH;
 				DrawBoxTextureMeter((int)texInMB,boxRect);
-				//GUILayout.EndHorizontal();
+				
 				
 				
 				GUILayout.Label( $"\tLightmaps - {lightmapCount}");
@@ -720,15 +752,65 @@ namespace MOR.Museum {
 				if (GUI.Button(boxRect, settings.MORPlaceablePrefab == null ? "Make MOR Placeable Prefab Variant" : "Update MOR Placeable Prefab Variant")) {
 					MakeMORPlaceablePrefabVariant();
 				}
-
+				GUILayout.Space(40);
 				if (GUILayout.Button("Export Bundle")) {
 					ExportBundle();
 				}
+				if (GUILayout.Button("Export Package")) {
+					ExportBundle(true);
+				}
 				
 			}
-			//AddMORComponentsToRootPrefab(settings.rootPrefabSource);
 		}
 
+		public void CheckScripts(){
+			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(settings.rootPrefabSource));
+			foreach (string dependency in dependencies) {
+				if (dependency.EndsWith(".cs") == false) {
+					continue;
+				}
+
+				if (dependency.StartsWith("Assets/MOR") || dependency.StartsWith("Packages")) { //These are legit
+					continue;
+				}
+
+				Object asset = AssetDatabase.LoadAssetAtPath<Object>(dependency);
+				if (settings.scriptChecksDismissed == false) {
+					Debug.LogWarning($"Unsupported Component : {dependency}", asset);
+				}
+
+				settings.scriptValidationState = settings.scriptChecksDismissed ? ArtStagingSettings.ValidationState.HasWarnings : ArtStagingSettings.ValidationState.CriticalFail;
+				if (settings.scriptChecksDismissed == false) {
+					errorMessage = "Scripts local to package can't be loaded via bundle.";
+				}
+				else {
+					bool hasNamespace = false;
+					using (var reader = new StreamReader(dependency)) {
+						while (reader.EndOfStream == false) {
+							var line = reader.ReadLine();
+							if (line.StartsWith("namespace")) {
+								hasNamespace = true;
+								break;
+							}
+
+							if (line.Contains("class")) {
+								break; //Kick out at the first class
+							}
+						}
+					}
+					if (hasNamespace == false) {
+						warningMessage += $"Please use a namespace in script. {dependency}";
+						Debug.LogWarning($"Script has a namespace = {hasNamespace}: {dependency}", asset);
+					}
+				}
+			}
+		}
+
+		public void DismissScriptCheck(){
+			settings.scriptValidationState = ArtStagingSettings.ValidationState.HasWarnings;
+			errorMessage = "";
+		}
+		
 		private void ExportBundle(bool buildPackage = false){
 			//ResourceValidation.
 			var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(settings.MORPlaceablePrefab));
@@ -768,10 +850,10 @@ namespace MOR.Museum {
 			
 			
 			if (buildPackage) {
-				string exportFilenamePackage = $"{prefix}_{Environment.UserName}_{datestamp}.unitypackage"; //TODO : set up somewhere to set this... prefab name? folder name? hmm....
+				string exportFilenamePackage = $"{prefix}_{Environment.UserName}_{datestamp}.unitypackage";
 				string projectPath = Directory.GetCurrentDirectory();
 				exportFilenamePackage = Path.Combine(projectPath, exportFilenamePackage);
-				AssetBundleBuild bundle = new AssetBundleBuild();
+				//AssetBundleBuild bundle = new AssetBundleBuild();
 				AssetDatabase.ExportPackage(assetsToExport.ToArray(), exportFilenamePackage, exportPackageOptions);
 				EditorUtility.RevealInFinder(exportFilenamePackage);
 			}
@@ -781,11 +863,12 @@ namespace MOR.Museum {
 				prefabImporter.assetBundleName = settings.rootPrefabSource.name;
 				prefabImporter.SetAssetBundleNameAndVariant(settings.rootPrefabSource.name,"");
 				
-				string exportFilenameBundle = $"{settings.MORPlaceablePrefab.name}.bundle"; //TODO : set up somewhere to set this... prefab name? folder name? hmm....
+				string exportFilenameBundle = $"{settings.MORPlaceablePrefab.name}.bundle"; 
 
 				string projectPath = Directory.GetCurrentDirectory();
 				exportFilenameBundle = Path.Combine(projectPath, exportFilenameBundle);
 				//AssetBundleBuild bundle = new AssetBundleBuild();
+				
 				/*
 				BuildPipeline.BuildAssetBundle(settings.MORPlaceablePrefab, assetsObjectsToExport.ToArray(), exportFilenameBundle
 					,out settings.checksum
@@ -795,7 +878,7 @@ namespace MOR.Museum {
 				*/
 				//BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
 				//buildPlayerOptions.assetBundleManifestPath
-				string exportFilenameBundlePath = $"{settings.MORPlaceablePrefab.name}"; //TODO : set up somewhere to set this... prefab name? folder name? hmm....
+				string exportFilenameBundlePath = $"{settings.MORPlaceablePrefab.name}"; 
 				exportFilenameBundlePath = Path.Combine(projectPath, exportFilenameBundlePath);
 				var pathExists = Directory.Exists(exportFilenameBundle);
 				if (pathExists == false) {
@@ -807,7 +890,7 @@ namespace MOR.Museum {
 				
 				var manifest = BuildPipeline.BuildAssetBundles(exportFilenameBundlePath
 					,buildMap
-					,BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle | BuildAssetBundleOptions.CollectDependencies
+					,BuildAssetBundleOptions.None 
 					, BuildTarget.StandaloneWindows64);
 				
 				EditorUtility.RevealInFinder(exportFilenameBundle);
@@ -838,13 +921,13 @@ namespace MOR.Museum {
 			var videoPlayers = scenePrefab.GetComponentsInChildren<VideoPlayer>(true);
 			settings.videoValidationState = ArtStagingSettings.ValidationState.Valid;
 			errorMessage = "";
-			bool needsScriptAdd = false;
+			//bool needsScriptAdd = false;
 			foreach (var player in videoPlayers) {
 				var morPlayer = player.GetComponent<FlatVideoPlayer>();
 				if (morPlayer == null) {
 					settings.videoValidationState = ArtStagingSettings.ValidationState.CriticalFail;
 					errorMessage += "Video Players need the MOR script : FlatVideoPlayer added\n";
-					needsScriptAdd = true;
+					//needsScriptAdd = true;
 				}
 				if (player.audioOutputMode != VideoAudioOutputMode.AudioSource && player.audioOutputMode != VideoAudioOutputMode.None) {
 					settings.videoValidationState = ArtStagingSettings.ValidationState.CriticalFail;
@@ -864,7 +947,7 @@ namespace MOR.Museum {
 			var videoPlayers = scenePrefab.GetComponentsInChildren<VideoPlayer>(true);
 			settings.videoValidationState = ArtStagingSettings.ValidationState.Valid;
 			errorMessage = "";
-				bool needsScriptAdd = false;
+			//bool needsScriptAdd = false;
 			foreach (VideoPlayer playerScene in videoPlayers) {
 				VideoPlayer player = PrefabUtility.GetCorrespondingObjectFromOriginalSource<VideoPlayer>(playerScene);
 				if (playerScene.GetComponent<FlatVideoPlayer>() != null) {
