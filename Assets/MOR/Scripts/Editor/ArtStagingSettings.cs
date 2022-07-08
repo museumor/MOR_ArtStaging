@@ -43,6 +43,19 @@ namespace MOR.Museum {
 		public bool inEditorMORLightmapApply = false; 
 		[ReadOnly] public uint  checksum = 0;
 		public bool scriptChecksDismissed = false;
+		
+		//# - Description Information etc.
+		public string ArtistName;
+		public string ArtistNationality;
+		public string ArtistWriteup;
+		public string ArtistWorkTitle;
+		public string ArtistWorkMedium;
+		public string ArtistWorkWriteup;
+		public string contactEmail;
+		public bool explicitContent;
+		public Texture2D thumbnailImage;
+		
+		
 		public void Save() {
 			EditorUtility.SetDirty(this);
 			AssetDatabase.SaveAssetIfDirty(this);
@@ -154,7 +167,7 @@ namespace MOR.Museum {
 				return;
 			}
 			ArtStagingEditor window = GetWindow<ArtStagingEditor>("MOR Art Staging", true);
-			window.minSize =  new Vector2(window.minSize.x, 410); //MAke taller by default?
+			window.minSize =  new Vector2(window.minSize.x, 500); //MAke taller by default?
 			window.Show();
 			ArtStagingSettings artStagingSettings = AssetDatabase.LoadAssetAtPath<ArtStagingSettings>("Assets/MOR/ArtStagingSettings.asset");
 
@@ -760,6 +773,52 @@ namespace MOR.Museum {
 					ExportBundle(true);
 				}
 				
+				
+				GUILayout.Space(50);
+				GUILayout.Label("Artwork Details:");
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artist Name",GUILayout.Width(150));
+				settings.ArtistName = GUILayout.TextField(settings.ArtistName);
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artist Email",GUILayout.Width(150));
+				settings.contactEmail = GUILayout.TextField(settings.contactEmail);
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artist Nationality",GUILayout.Width(150));
+				settings.ArtistNationality = GUILayout.TextField(settings.ArtistNationality);
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artist Writeup",GUILayout.Width(150));
+				settings.ArtistWriteup = GUILayout.TextArea(settings.ArtistWriteup,GUILayout.Height(60));
+				GUILayout.EndHorizontal();
+				
+				
+				GUILayout.Space(20);
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Explicit Content",GUILayout.Width(150));
+				settings.explicitContent = GUILayout.Toggle(settings.explicitContent,"");
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artwork Title",GUILayout.Width(150));
+				settings.ArtistWorkTitle = GUILayout.TextField(settings.ArtistWorkTitle);
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artwork Medium",GUILayout.Width(150));
+				settings.ArtistWorkMedium = GUILayout.TextField(settings.ArtistWorkMedium);
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Artwork Writeup",GUILayout.Width(150));
+				settings.ArtistWorkWriteup = GUILayout.TextArea(settings.ArtistWorkWriteup,GUILayout.Height(60));
+				GUILayout.EndHorizontal();
+				
+				
 			}
 		}
 
@@ -977,6 +1036,9 @@ namespace MOR.Museum {
 		private void ApplyMORLightmap(){
 			GameObject diskPrefab = settings.rootPrefabSource;
 			GameObject scenePrefab = FindSceneInstance(diskPrefab);
+			if(scenePrefab == null){
+				return;
+			}
 			var lightmapOffsets = scenePrefab.GetComponentsInChildren<StoreLightmapOffset>();
 			foreach (var offseter in lightmapOffsets) {
 				offseter.ApplyMaterialPropertyBlockSettings();
@@ -1432,7 +1494,10 @@ namespace MOR.Museum {
 
 			if (d.timeUpdateMode != DirectorUpdateMode.DSPClock) {
 				SerializedObject o = new SerializedObject(d);
-				var prob = o.FindProperty(nameof(d.timeUpdateMode));
+				var prob = o.FindProperty("m_DirectorUpdateMode");
+				if (prob == null) {
+					Debug.LogError($"Playable Director Property null : m_DirectorUpdateMode",d.gameObject);
+				}
 				prob.intValue = (int)DirectorUpdateMode.DSPClock;
 				o.ApplyModifiedProperties();
 				PrefabUtility.SavePrefabAsset(diskPrefab);
@@ -1644,6 +1709,10 @@ namespace MOR.Museum {
 				Material[] materials = meshRenderer.sharedMaterials;
 				foreach (Material material in materials) {
 					string modelPath = AssetDatabase.GetAssetPath(material);
+					if (modelPath.StartsWith("Packages")) {
+						settings.materialValidationState = ArtStagingSettings.ValidationState.CriticalFail;
+						errorMessage += $"Using Material from a package.  - {meshRenderer.name}. Copy Locally.\n";
+					}
 					if (material.name == "Default-Material" && modelPath.EndsWith("unity_builtin_extra")) {
 						//Debug.Log($"DefaultMaterial modelpath - {modelPath}");
 						settings.materialValidationState = ArtStagingSettings.ValidationState.CriticalFail;
@@ -1683,6 +1752,10 @@ namespace MOR.Museum {
 					Material meshMaterial = mesh.sharedMaterial;
 					string modelPath = AssetDatabase.GetAssetPath(meshMaterial);
 					bool isUnityDefaultMaterial = meshMaterial.name == "Default-Material" && modelPath.EndsWith("unity_builtin_extra");
+					if (modelPath.StartsWith("Packages")) {
+						isUnityDefaultMaterial = true; //piggyback this.
+					}
+					
 					
 					//If source is in an FBX we need to extract it
 					if (!isUnityDefaultMaterial && modelPath.EndsWith(".fbx") == false) {
@@ -1737,7 +1810,16 @@ namespace MOR.Museum {
 					else {
 						importer.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
 						importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
+						SerializedObject obj = new SerializedObject(mesh);
+						var propArr = obj.FindProperty("m_Materials");
+						var prop = propArr.GetArrayElementAtIndex(0);
+						prop.objectReferenceValue = diskMaterial;
+						var changed = obj.ApplyModifiedProperties();
+						if (changed) {
+							changesOnDisk = true;
+						}
 					}
+					
 
 				}
 
@@ -1809,7 +1891,7 @@ namespace MOR.Museum {
 		/// Validate all meshes.
 		/// </summary>
 		public void DoMeshCheck() {
-			string[] resultWarnings = CheckMeshIntegrity(settings.rootPrefabSource, otherDimension: settings.isThroughPortal);
+			string[] resultWarnings = CheckMeshIntegrity( otherDimension: settings.isThroughPortal);
 			bool hasErrors = string.IsNullOrEmpty(resultWarnings[0]) == false;
 			bool hasWarnings = string.IsNullOrEmpty(resultWarnings[1]) == false;
 			settings.modelsValidationState =
@@ -1933,9 +2015,12 @@ namespace MOR.Museum {
 		}
 
 
-		public static string[] CheckMeshIntegrity(GameObject g, string assetPath = "", bool otherDimension = false) {
+		public string[] CheckMeshIntegrity( string assetPath = "", bool otherDimension = false){
+			var diskPrefab = settings.rootPrefabSource;
+			var scenePrefab = FindSceneInstance(diskPrefab);
+			
 			needsMeshSplit = false;
-			Renderer[] renderers = g.GetComponentsInChildren<Renderer>(true);
+			Renderer[] renderers = scenePrefab.GetComponentsInChildren<Renderer>(true);
 			int vertexCountTotal = 0;
 			string errors = "";
 			string warnings = "";
@@ -1959,7 +2044,7 @@ namespace MOR.Museum {
 
 				vertexCountTotal += vertexCount;
 				if (vertexCount > ushort.MaxValue) {
-					warnings += ($"MOR - Mesh has too many verts for 16bit indexing `{vertexCount}` - {renderer.name} Consider splitting into multiple parts : model = {assetPath}  part = {g.name}\n");
+					warnings += ($"MOR - Mesh has too many verts for 16bit indexing `{vertexCount}` - {renderer.name} Consider splitting into multiple parts : model = {assetPath}  part = {scenePrefab.name}\n");
 				}
 
 				if (renderer.sharedMaterials.Length > 1) {
@@ -1968,6 +2053,10 @@ namespace MOR.Museum {
 				}
 
 				string filepath = AssetDatabase.GetAssetPath(renderMesh);
+				if (string.IsNullOrEmpty(filepath)) {
+					errors += "Mesh not saved to disk. Needs export to file";
+					needsMeshSplit = true;
+				}
 				string extension = Path.GetExtension(filepath);
 				if (string.IsNullOrEmpty(extension)) {
 					continue;
@@ -1996,9 +2085,9 @@ namespace MOR.Museum {
 
 			if (vertexCountTotal > VERT_COUNT_MAX_PC) {
 				if (vertexCountTotal > VERT_COUNT_MAX_PC * (otherDimension ? 3.5f : 1.2f)) {
-					errors += ($"Model has too many vertices, please simplify the model :{g.name} model - {assetPath}  size = {vertexCountTotal} vertices.\n");
+					errors += ($"Model has too many vertices, please simplify the model :{scenePrefab.name} model - {assetPath}  size = {vertexCountTotal} vertices.\n");
 				} else {
-					warnings += ($"Model likely has too many vertices, please simplify the model :{g.name} model - {assetPath}  size = {vertexCountTotal} vertices.\n");
+					warnings += ($"Model likely has too many vertices, please simplify the model :{scenePrefab.name} model - {assetPath}  size = {vertexCountTotal} vertices.\n");
 				}
 			}
 
@@ -2047,18 +2136,46 @@ namespace MOR.Museum {
 			List<Mesh> meshSources = new List<Mesh>();
 			List<string> splitFileSources = new List<string>();
 			foreach (MeshRenderer sceneMeshRenderer in meshes) {
-				if (sceneMeshRenderer.sharedMaterials.Length < 2) {
-					continue;
-				}
-
 				MeshFilter meshFilter = sceneMeshRenderer.GetComponent<MeshFilter>();
+
 				Mesh sourceMesh = meshFilter.sharedMesh;
+				string sourcePath = AssetDatabase.GetAssetPath(sourceMesh);
+				if (string.IsNullOrEmpty(sourcePath)) {
+					//Here we have a mesh which is in 'scene' memory, and needs to be exported to disk.
+					Debug.Log($"Mesh path : {sourcePath}");
+					sourcePath = Path.GetDirectoryName(rootSourcePath)+"/";
+					
+					string outPath = Path.Combine(Path.GetDirectoryName(sourcePath), $"_{sourceMesh.name}_split.fbx");
+					if (File.Exists(outPath)) {
+						Debug.LogWarning("Overwriting file : This may break previously assigned objects using these meshes");
+					}
+					string resultPathM = ModelExporter.ExportObject(outPath,sceneMeshRenderer.gameObject);
+					if (string.IsNullOrEmpty(resultPathM)) {
+						Debug.LogError($"Couldn't export mesh to  : {outPath}",meshFilter.gameObject);
+						continue;
+					}
+					GameObject newFBXM = AssetDatabase.LoadAssetAtPath<GameObject>(resultPathM);
+
+					MeshFilter importMesh = newFBXM.GetComponentInChildren<MeshFilter>(true);
+					Mesh newMesh = importMesh.sharedMesh;
+					var meshColl = sceneMeshRenderer.GetComponent<MeshCollider>();
+					if (meshColl != null) {
+						meshColl.sharedMesh = newMesh;
+					}
+					meshFilter.sharedMesh = newMesh;
+					EditorUtility.SetDirty(meshFilter);
+					//PrefabUtility.ApplyPropertyOverride();
+					continue;
+					
+				} 
 				if (HasHighDimensionUVs(sourceMesh)) {
 					//For now skip, but look into flagging to export to .asset instead.
 					continue;
 				}
-
-				string sourcePath = AssetDatabase.GetAssetPath(sourceMesh);
+				if (sceneMeshRenderer.sharedMaterials.Length < 2) {
+					continue;
+				}
+				
 				Debug.Log(sourcePath, sceneMeshRenderer.gameObject);
 
 				//copy out of hierarchy for target duplication
@@ -2220,7 +2337,12 @@ namespace MOR.Museum {
 					}
 
 					EditorUtility.SetDirty(scenePrefab);
-					PrefabUtility.ApplyAddedGameObject(newObject, rootSourcePath, InteractionMode.AutomatedAction);
+					try {
+						PrefabUtility.ApplyAddedGameObject(newObject, rootSourcePath, InteractionMode.AutomatedAction);
+					}
+					catch {
+						Debug.LogError("Couldn't apply game object to source???");
+					}
 					//Debug.Log(rootSourcePath);
 				}
 
